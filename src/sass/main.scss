@@ -1,0 +1,19 @@
+@import "bulma";
+
+.container {
+  margin: 25px auto;
+  padding: 25px;
+}
+
+.nes-state {
+    background-color: $blue;
+}
+
+.nes-controls {
+    background-color: $grey;
+}
+
+.nes-disassembly {
+    background-color: $black;
+    color: $green;
+}

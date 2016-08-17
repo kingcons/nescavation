@@ -3,13 +3,31 @@
   <head>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>My Cool Project</title>
+    <title>Nescavation - Exploring the Nintendo with Javascript</title>
     <link rel="stylesheet" href="css/normalize.css">
     <link rel="stylesheet" href="css/main.css">
   </head>
   <body>
     <div class="container">
-      <p>Welcome to your life.</p>
+      <div class="tile is-ancestor">
+        <div class="tile is-vertical">
+          <div class="tile is-parent nes-state">
+          </div>
+          <div class="tile is-parent nes-controls">
+            <div class="tile box is-child">
+              <nav class="level">
+                <input class="fileinput" type="file"/>
+                <a class="button is-info">Play</a>
+                <a class="button is-info">Pause</a>
+                <a class="button is-info">Step</a>
+                <a class="button is-info">Reset</a>
+              </nav>
+            </div>
+          </div>
+        </div>
+        <div class="tile is-parent nes-disassembly">
+        </div>
+      </div>
     </div>
     <script src="js/bundle.js"></script>
   </body>
