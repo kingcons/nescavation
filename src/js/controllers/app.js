@@ -19,7 +19,7 @@ class AppController {
 
   romLoadHandler () {
     this.reader.onload = this.swapCartridge.bind(this);
-    this.controls.find(".input").on("change", ev => {
+    this.controls.find(".file").on("change", ev => {
       let file = ev.target.files[0];
       this.reader.readAsArrayBuffer(file);
     });

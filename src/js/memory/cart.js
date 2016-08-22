@@ -28,6 +28,7 @@ class Cartridge {
       mapperName: MAPPERS[mapperId],
       mirroring: header[6] & 255 ? "vertical" : "horizontal"
     };
+
     this.data = data.slice(16);
   }
 
