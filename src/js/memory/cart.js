@@ -30,6 +30,7 @@ class Cartridge {
     };
 
     this.data = data.slice(16);
+
   }
 
 }
