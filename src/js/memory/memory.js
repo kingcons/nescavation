@@ -20,12 +20,18 @@ class Memory {
   // Addressing Modes
   //
 
-  // NOTE: No special handling at present for "raw" opcodes
-  // such as: jmp, jsr, asl, lsr, rol, ror
   // REMINDER: The operator precedence of + is greater than &.
 
   immediate (cpu) {
     return this.memory[cpu.pc];
+  }
+
+  accumulator (cpu, raw) {
+    if (raw) {
+      return cpu.acc;
+    } else {
+      return this.memory[cpu.acc];
+    }
   }
 
   zero_page (cpu) {
@@ -45,9 +51,13 @@ class Memory {
     return this.memory[address];
   }
 
-  absolute (cpu) {
+  absolute (cpu, raw) {
     let address = get_word(cpu.pc);
-    return this.memory[address];
+    if (raw) {
+      return address;
+    } else {
+      return this.memory[address];
+    }
   }
 
   absolute_x (cpu) {
@@ -62,7 +72,14 @@ class Memory {
     return this.memory[address];
   }
 
-  // FIXME: Handle page wrapping in indexed indirect modes.
+  // FIXME: Handle page wrapping in indirect modes.
+
+  // NOTE: Indirect is only used by JMP.
+  indirect (cpu) {
+    let start = get_word(cpu.pc);
+    let address = get_word(start);
+    return address;
+  }
 
   indirect_x (cpu) {
     let start = this.memory[cpu.pc];
