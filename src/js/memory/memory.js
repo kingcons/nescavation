@@ -22,6 +22,9 @@ class Memory {
 
   // REMINDER: The operator precedence of + is greater than &.
 
+  // FIXME: Make sure setters are supported for...
+  // asl, lsr, rol, ror, dec, inc, sta, stx, sty
+
   immediate (cpu) {
     return this.memory[cpu.pc];
   }
