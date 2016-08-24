@@ -15,6 +15,8 @@ class AppController {
   swapCartridge () {
     let data = new Uint8Array(this.reader.result);
     this.cpu.memory.swapCart(data);
+    this.cpu.reset();
+    console.log(this.cpu);
   }
 
   romLoadHandler () {

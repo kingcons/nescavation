@@ -1,4 +1,4 @@
-function init (cpu, memory) {
+function init_opcodes (cpu, memory) {
   let adc = [[0x61, memory.indirect_x],
              [0x65, memory.zero_page],
              [0x69, memory.immediate],
@@ -221,4 +221,4 @@ function init_op (cpu, versions, method) {
   });
 }
 
-export { init };
+export { init_opcodes };

@@ -1,19 +1,23 @@
-import { init } from "./init";
+import { init_opcodes } from "./init";
 
 class Cpu {
 
   constructor (memory) {
-    this.acc    = 0; // Accumulator
-    this.xReg   = 0; // X Register
-    this.yReg   = 0; // Y Register
-    this.status = 0; // Status Register
-    this.pc     = 0; // Program Counter
-    this.sp     = 0; // Stack Pointer
+    this.pc     = 0;      // Program Counter
+    this.sp     = 0xfd;   // Stack Pointer
+    this.status = 0x24;   // Status Register
+    this.acc    = 0;      // Accumulator
+    this.xReg   = 0;      // X Register
+    this.yReg   = 0;      // Y Register
     this.memory = memory;
     this.opcodes = {};
 
-    init(this, this.memory);
-    console.log(this.opcodes);
+    init_opcodes(this, this.memory);
+    this.reset();
+  }
+
+  reset () {
+    this.pc = this.memory.get_word(0xfffc);
   }
 
   adc (addr_mode) {
