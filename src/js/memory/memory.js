@@ -21,9 +21,8 @@ class Memory {
   //
 
   // REMINDER: The operator precedence of + is greater than &.
-
-  // FIXME: Make sure setters are supported for...
-  // asl, lsr, rol, ror, dec, inc, sta, stx, sty
+  // FIXME: Handle page wrapping in indirect modes.
+  // FIXME: Handle cycle counting correctly. :troll:
 
   immediate (cpu) {
     return this.memory[cpu.pc];
@@ -37,45 +36,39 @@ class Memory {
     }
   }
 
-  zero_page (cpu) {
+  zero_page (cpu, raw) {
     let address = this.memory[cpu.pc];
-    return this.memory[address];
+    return raw ? address : this.memory[address];
   }
 
-  zero_page_x (cpu) {
+  zero_page_x (cpu, raw) {
     let start = this.memory[cpu.pc];
     let address = start + cpu.xReg & 0xff;
-    return this.memory[address];
+    return raw ? address : this.memory[address];
   }
 
-  zero_page_y (cpu) {
+  zero_page_y (cpu, raw) {
     let start = this.memory[cpu.pc];
     let address = start + cpu.yReg & 0xff;
-    return this.memory[address];
+    return raw ? address : this.memory[address];
   }
 
   absolute (cpu, raw) {
     let address = get_word(cpu.pc);
-    if (raw) {
-      return address;
-    } else {
-      return this.memory[address];
-    }
+    return raw ? address : this.memory[address];
   }
 
-  absolute_x (cpu) {
+  absolute_x (cpu, raw) {
     let start = get_word(cpu.pc);
     let address = start + cpu.xReg & 0xffff;
-    return this.memory[address];
+    return raw ? address : this.memory[address];
   }
 
-  absolute_y (cpu) {
+  absolute_y (cpu, raw) {
     let start = get_word(cpu.pc);
     let address = start + cpu.yReg & 0xffff;
-    return this.memory[address];
+    return raw ? address : this.memory[address];
   }
-
-  // FIXME: Handle page wrapping in indirect modes.
 
   // NOTE: Indirect is only used by JMP.
   indirect (cpu) {
@@ -84,21 +77,19 @@ class Memory {
     return address;
   }
 
-  indirect_x (cpu) {
+  indirect_x (cpu, raw) {
     let start = this.memory[cpu.pc];
     let indirect = start + cpu.xReg & 0xff;
     let address = get_word(indirect);
-    return this.memory[address];
+    return raw ? address : this.memory[address];
   }
 
-  indirect_y (cpu) {
+  indirect_y (cpu, raw) {
     let start = this.memory[cpu.pc];
     let indirect = start + cpu.yReg & 0xff;
     let address = get_word(indirect);
-    return this.memory[address];
+    return raw ? address : this.memory[address];
   }
-
-  // FIXME: Handle cycle counting correctly. :troll:
 
   relative (cpu) {
     let offset = this.memory[cpu.pc];
