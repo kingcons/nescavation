@@ -10,6 +10,8 @@ class AppController {
 
   init () {
     this.romLoadHandler();
+    this.playPauseHandler();
+    this.stepHandler();
   }
 
   swapCartridge () {
@@ -24,6 +26,25 @@ class AppController {
     this.controls.find(".file").on("change", ev => {
       let file = ev.target.files[0];
       this.reader.readAsArrayBuffer(file);
+    });
+  }
+
+  playPauseHandler () {
+    // this.controls.find(".play").on("click", event => {
+    //   let text = event.target.innerHTML;
+    //   if (text === "Play") {
+    //     event.target.innerHTML = "Pause";
+    //   } else {
+    //     event.target.innerHTML = "Play";
+    //   }
+    //   this.cpu.paused = !this.cpu.paused;
+    //   this.cpu.run();
+    // });
+  }
+
+  stepHandler () {
+    this.controls.find(".step").on("click", event => {
+      this.cpu.step();
     });
   }
 

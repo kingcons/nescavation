@@ -3,14 +3,15 @@ import { init_opcodes } from "./init";
 class Cpu {
 
   constructor (memory) {
-    this.pc     = 0;      // Program Counter
-    this.sp     = 0xfd;   // Stack Pointer
-    this.status = 0x24;   // Status Register
-    this.acc    = 0;      // Accumulator
-    this.xReg   = 0;      // X Register
-    this.yReg   = 0;      // Y Register
-    this.memory = memory;
-    this.opcodes = {};
+    this.paused   = true;
+    this.pc       = 0;      // Program Counter
+    this.sp       = 0xfd;   // Stack Pointer
+    this.status   = 0x24;   // Status Register
+    this.acc      = 0;      // Accumulator
+    this.xReg     = 0;      // X Register
+    this.yReg     = 0;      // Y Register
+    this.memory   = memory;
+    this.opcodes  = {};
 
     init_opcodes(this, this.memory);
     this.reset();
@@ -18,6 +19,20 @@ class Cpu {
 
   reset () {
     this.pc = this.memory.get_word(0xfffc);
+  }
+
+  run () {
+    // while (!this.paused) {
+    //   this.step();
+    // }
+  }
+
+  step () {
+    let instruction = this.memory.immediate(this);
+    console.log("Instruction", instruction);
+    console.log("Opcode", this.opcodes[instruction]);
+    console.log("Cpu", this);
+    return this.opcodes[instruction]();
   }
 
   adc (addr_mode) {
