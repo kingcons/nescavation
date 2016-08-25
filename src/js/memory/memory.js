@@ -24,6 +24,32 @@ class Memory {
   // FIXME: Handle page wrapping in indirect modes.
   // FIXME: Handle cycle counting correctly. :troll:
 
+  /*
+
+   TODO: Dispatch correctly to PPU/APU/RAM/ROM, etc.
+
+   At present, we're just reading this.memory directly.
+   In the future, we should do "the right thing" by
+   checking what region the address is in.
+
+   Ultimately, any CPU instruction has an addressing mode
+   that addressing mode returns a u16 into memory,
+   and we may then read a byte or write a byte to that
+   location.
+
+   The right thing to do is probably replace any
+   direct calls to this.memory[...] with load/store
+   methods that dispatch correctly to the underlying HW.
+
+   This will require reworking the opcodes slightly
+   and figuring out if we need any tweaks for "raw"
+   opcodes. Perhaps we can build closures in the opcode
+   initialization for getting and setting? We've got to
+   extend that to accurately track program counter at
+   some point too.
+
+  */
+
   immediate (cpu) {
     return this.memory[cpu.pc];
   }

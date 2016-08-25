@@ -1,5 +1,5 @@
 const MAPPERS = {
-  0: "No Mapper",
+  0: "No Mapper/NROM",
   1: "MMC1",
   2: "UNROM",
   3: "CNROM",
