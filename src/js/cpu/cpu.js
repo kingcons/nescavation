@@ -36,9 +36,17 @@ class Cpu {
     return this.status |= bitmask;
   }
 
-  clearFlag(flag) {
+  clearFlag (flag) {
     let bitmask = 1 << Flag[flag].ordinal;
     return this.status &= ~bitmask;
+  }
+
+  branchIf (jump) {
+    if (jump) {
+      this.pc = this.memory.relative(this);
+    } else {
+      this.pc += 1;
+    }
   }
 
   run () {
@@ -65,33 +73,41 @@ class Cpu {
   }
 
   bcc (addr_mode) {
+    this.branchIf(this.getFlag("CARRY") === 0);
   }
 
   bcs (addr_mode) {
+    this.branchIf(this.getFlag("CARRY") !== 0);
   }
 
   beq (addr_mode) {
+    this.branchIf(this.getFlag("ZERO") !== 0);
   }
 
   bit (addr_mode) {
   }
 
   bmi (addr_mode) {
+    this.branchIf(this.getFlag("NEGATIVE") !== 0);
   }
 
   bne (addr_mode) {
+    this.branchIf(this.getFlag("ZERO") === 0);
   }
 
   bpl (addr_mode) {
+    this.branchIf(this.getFlag("NEGATIVE") === 0);
   }
 
   brk (addr_mode) {
   }
 
   bvc (addr_mode) {
+    this.branchIf(this.getFlag("OVERFLOW") === 0);
   }
 
   bvs (addr_mode) {
+    this.branchIf(this.getFlag("OVERFLOW") !== 0);
   }
 
   clc (addr_mode) {
