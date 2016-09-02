@@ -41,6 +41,11 @@ class Cpu {
     return this.status &= ~bitmask;
   }
 
+  setFlagZN (value) {
+    if (value === 0) { this.setFlag("ZERO"); }
+    if (value & 0x80) { this.setFlag("NEGATIVE"); }
+  }
+
   branchIf (jump) {
     if (jump) {
       this.pc = this.memory.relative(this);
@@ -229,21 +234,32 @@ class Cpu {
   }
 
   tax (addr_mode) {
+    this.xReg = this.acc;
+    this.setFlagZN(this.xReg);
   }
 
   tay (addr_mode) {
+    this.yReg = this.acc;
+    this.setFlagZN(this.yReg);
   }
 
   tsx (addr_mode) {
+    this.xReg = this.sp;
+    this.setFlagZN(this.xReg);
   }
 
   txa (addr_mode) {
+    this.acc = this.xReg;
+    this.setFlagZN(this.acc);
   }
 
   txs (addr_mode) {
+    this.sp = this.xReg;
   }
 
   tya (addr_mode) {
+    this.acc = this.yReg;
+    this.setFlagZN(this.acc);
   }
 
 }
