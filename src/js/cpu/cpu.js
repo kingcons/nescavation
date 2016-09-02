@@ -1,4 +1,9 @@
 import { init_opcodes } from "./init";
+import { Enum } from "enumify";
+
+class Flag extends Enum {};
+Flag.initEnum(["CARRY", "ZERO", "INTERRUPT", "DECIMAL",
+               "BREAK", "UNUSED", "OVERFLOW", "NEGATIVE"]);
 
 class Cpu {
 
@@ -19,6 +24,14 @@ class Cpu {
 
   reset () {
     this.pc = this.memory.get_word(0xfffc);
+  }
+
+  getFlag (flag) {
+    return this.status & 1 << Flag[flag].ordinal;
+  }
+
+  setFlag (flag) {
+    return this.status = this.status | 1 << Flag[flag].ordinal;
   }
 
   run () {
