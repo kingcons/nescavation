@@ -54,7 +54,37 @@ class Cpu {
     }
   }
 
-  run () {
+  /*
+
+   Note: The invariant we maintain here is that the CPU Stack
+   Pointer always points to the top of the stack/unused memory.
+
+   It's unclear what should happen if a word is pushed/popped
+   across the stack boundary, e.g. 0x101 / 0x1ff
+
+   */
+
+  stackPush (value) {
+    let address = 0x100 + this.sp;
+    this.memory.store(address, value & 0xff);
+    this.sp = this.sp - 1 & 0xff;
+  }
+
+  stackPushWord (value) {
+    this.stackPush(value >> 8);
+    this.stackPush(value & 0xff);
+  }
+
+  stackPop () {
+    this.sp = this.sp + 1 & 0xff;
+    return this.memory.load(this.sp + 0x100);
+  }
+
+  stackPopWord () {
+    return this.stackPop() + (this.stackPop() << 8);
+  }
+
+run () {
     // while (!this.paused) {
     //   this.step();
     // }
@@ -74,6 +104,8 @@ class Cpu {
     CPU Instructions
    ==================
 
+   Remaining: asl, bit, cmp, cpx, cpy, dec, eor, inc, lda, ldx, ldy, lsr, ora, rol, ror, sbc, sta, stx, sty
+
    */
 
   // FIXME: Figure out addressing mode calling variations!
@@ -81,9 +113,19 @@ class Cpu {
   // Remember this includes accumulator modes for asl, etc
 
   adc (addrMode) {
+    let result = this.acc + addrMode(this) + this.getFlag("CARRY");
+    // TODO: Handle overflow.
+    if (result > 0xff) { this.setFlag("CARRY"); }
+    if (result & 0xff === 0) { this.setFlag("ZERO"); }
+    if (result & 0x80) { this.setFlag("NEGATIVE"); }
+    this.acc = result & 0xff;
   }
 
   and (addrMode) {
+    let result = this.acc & addrMode(this);
+    if (result === 0) { this.setFlag("ZERO"); }
+    if (result & 0x80) { this.setFlag("NEGATIVE"); }
+    this.acc = result;
   }
 
   asl (addrMode) {
@@ -117,6 +159,13 @@ class Cpu {
   }
 
   brk (addrMode) {
+    // FIXME: Should we really be incrementing here?
+    let pc = this.pc + 1 & 0xffff;
+    this.stackPushWord(pc);
+    this.setFlag("BREAK");
+    this.stackPush(this.status);
+    this.setFlag("INTERRUPT");
+    this.pc = this.memory.getWord(0xfffe);
   }
 
   bvc (addrMode) {
@@ -156,9 +205,13 @@ class Cpu {
   }
 
   dex (addrMode) {
+    this.xReg = this.xReg - 1 & 0xff;
+    this.setFlagNZ(this.xReg);
   }
 
   dey (addrMode) {
+    this.yReg = this.yReg - 1 & 0xff;
+    this.setFlagNZ(this.yReg);
   }
 
   eor (addrMode) {
@@ -168,15 +221,26 @@ class Cpu {
   }
 
   inx (addrMode) {
+    this.xReg = this.xReg + 1 & 0xff;
+    this.setFlagNZ(this.xReg);
   }
 
   iny (addrMode) {
+    this.yReg = this.yReg + 1 & 0xff;
+    this.setFlagNZ(this.yReg);
   }
 
   jmp (addrMode) {
+    let jumpTo = addrMode(this);
+    this.pc = jumpTo;
   }
 
   jsr (addrMode) {
+    // Add 2 to move over the jump address to the next opcode.
+    let returnTo = this.pc + 2 & 0xffff;
+    this.stackPushWord(returnTo);
+    let jumpTo = addrMode(this);
+    this.pc = jumpTo;
   }
 
   lda (addrMode) {
@@ -197,16 +261,23 @@ class Cpu {
   ora (addrMode) {
   }
 
+  // FIXME: Any status flag tweaks needed in PHP/PLP?
+
   pha (addrMode) {
+    this.stackPush(this.acc);
   }
 
   php (addrMode) {
+    this.stackPush(this.status);
   }
 
   pla (addrMode) {
+    this.acc = this.stackPop();
+    this.setFlagNZ(this.acc);
   }
 
   plp (addrMode) {
+    this.status = this.stackPop();
   }
 
   rol (addrMode) {
@@ -216,9 +287,12 @@ class Cpu {
   }
 
   rti (addrMode) {
+    this.status = this.stackPop() | 0x20;
+    this.pc = this.stackPopWord();
   }
 
   rts (addrMode) {
+    this.pc = this.stackPopWord();
   }
 
   sbc (addrMode) {
