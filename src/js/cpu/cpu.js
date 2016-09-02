@@ -27,11 +27,18 @@ class Cpu {
   }
 
   getFlag (flag) {
-    return this.status & 1 << Flag[flag].ordinal;
+    let bitmask = 1 << Flag[flag].ordinal;
+    return this.status & bitmask;
   }
 
   setFlag (flag) {
-    return this.status = this.status | 1 << Flag[flag].ordinal;
+    let bitmask = 1 << Flag[flag].ordinal;
+    return this.status |= bitmask;
+  }
+
+  clearFlag(flag) {
+    let bitmask = 1 << Flag[flag].ordinal;
+    return this.status &= ~bitmask;
   }
 
   run () {
@@ -88,15 +95,19 @@ class Cpu {
   }
 
   clc (addr_mode) {
+    this.clearFlag("CARRY");
   }
 
   cld (addr_mode) {
+    this.clearFlag("DECIMAL");
   }
 
   cli (addr_mode) {
+    this.clearFlag("INTERRUPT");
   }
 
   clv (addr_mode) {
+    this.clearFlag("OVERFLOW");
   }
 
   cmp (addr_mode) {
@@ -181,12 +192,15 @@ class Cpu {
   }
 
   sec (addr_mode) {
+    this.setFlag("CARRY");
   }
 
   sed (addr_mode) {
+    this.setFlag("DECIMAL");
   }
 
   sei (addr_mode) {
+    this.setFlag("INTERRUPT");
   }
 
   sta (addr_mode) {
