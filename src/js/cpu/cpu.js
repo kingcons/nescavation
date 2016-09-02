@@ -1,7 +1,7 @@
-import { init_opcodes } from "./init";
+import { initOpcodes } from "./init";
 import { Enum } from "enumify";
 
-class Flag extends Enum {};
+class Flag extends Enum {}
 Flag.initEnum(["CARRY", "ZERO", "INTERRUPT", "DECIMAL",
                "BREAK", "UNUSED", "OVERFLOW", "NEGATIVE"]);
 
@@ -18,12 +18,12 @@ class Cpu {
     this.memory   = memory;
     this.opcodes  = {};
 
-    init_opcodes(this, this.memory);
+    initOpcodes(this, this.memory);
     this.reset();
   }
 
   reset () {
-    this.pc = this.memory.get_word(0xfffc);
+    this.pc = this.memory.getWord(0xfffc);
   }
 
   getFlag (flag) {
@@ -68,196 +68,208 @@ class Cpu {
     return this.opcodes[instruction]();
   }
 
-  adc (addr_mode) {
+  /*
+
+   ==================
+    CPU Instructions
+   ==================
+
+   */
+
+  // FIXME: Figure out addressing mode calling variations!
+  // i.e. raw mode, etc. Set up differently in initOps?
+  // Remember this includes accumulator modes for asl, etc
+
+  adc (addrMode) {
   }
 
-  and (addr_mode) {
+  and (addrMode) {
   }
 
-  asl (addr_mode) {
+  asl (addrMode) {
   }
 
-  bcc (addr_mode) {
+  bcc (addrMode) {
     this.branchIf(this.getFlag("CARRY") === 0);
   }
 
-  bcs (addr_mode) {
+  bcs (addrMode) {
     this.branchIf(this.getFlag("CARRY") !== 0);
   }
 
-  beq (addr_mode) {
+  beq (addrMode) {
     this.branchIf(this.getFlag("ZERO") !== 0);
   }
 
-  bit (addr_mode) {
+  bit (addrMode) {
   }
 
-  bmi (addr_mode) {
+  bmi (addrMode) {
     this.branchIf(this.getFlag("NEGATIVE") !== 0);
   }
 
-  bne (addr_mode) {
+  bne (addrMode) {
     this.branchIf(this.getFlag("ZERO") === 0);
   }
 
-  bpl (addr_mode) {
+  bpl (addrMode) {
     this.branchIf(this.getFlag("NEGATIVE") === 0);
   }
 
-  brk (addr_mode) {
+  brk (addrMode) {
   }
 
-  bvc (addr_mode) {
+  bvc (addrMode) {
     this.branchIf(this.getFlag("OVERFLOW") === 0);
   }
 
-  bvs (addr_mode) {
+  bvs (addrMode) {
     this.branchIf(this.getFlag("OVERFLOW") !== 0);
   }
 
-  clc (addr_mode) {
+  clc (addrMode) {
     this.clearFlag("CARRY");
   }
 
-  cld (addr_mode) {
+  cld (addrMode) {
     this.clearFlag("DECIMAL");
   }
 
-  cli (addr_mode) {
+  cli (addrMode) {
     this.clearFlag("INTERRUPT");
   }
 
-  clv (addr_mode) {
+  clv (addrMode) {
     this.clearFlag("OVERFLOW");
   }
 
-  cmp (addr_mode) {
+  cmp (addrMode) {
   }
 
-  cpx (addr_mode) {
+  cpx (addrMode) {
   }
 
-  cpy (addr_mode) {
+  cpy (addrMode) {
   }
 
-  dec (addr_mode) {
+  dec (addrMode) {
   }
 
-  dex (addr_mode) {
+  dex (addrMode) {
   }
 
-  dey (addr_mode) {
+  dey (addrMode) {
   }
 
-  eor (addr_mode) {
+  eor (addrMode) {
   }
 
-  inc (addr_mode) {
+  inc (addrMode) {
   }
 
-  inx (addr_mode) {
+  inx (addrMode) {
   }
 
-  iny (addr_mode) {
+  iny (addrMode) {
   }
 
-  jmp (addr_mode) {
+  jmp (addrMode) {
   }
 
-  jsr (addr_mode) {
+  jsr (addrMode) {
   }
 
-  lda (addr_mode) {
+  lda (addrMode) {
   }
 
-  ldx (addr_mode) {
+  ldx (addrMode) {
   }
 
-  ldy (addr_mode) {
+  ldy (addrMode) {
   }
 
-  lsr (addr_mode) {
+  lsr (addrMode) {
   }
 
-  nop (addr_mode) {
+  nop (addrMode) {
   }
 
-  ora (addr_mode) {
+  ora (addrMode) {
   }
 
-  pha (addr_mode) {
+  pha (addrMode) {
   }
 
-  php (addr_mode) {
+  php (addrMode) {
   }
 
-  pla (addr_mode) {
+  pla (addrMode) {
   }
 
-  plp (addr_mode) {
+  plp (addrMode) {
   }
 
-  rol (addr_mode) {
+  rol (addrMode) {
   }
 
-  ror (addr_mode) {
+  ror (addrMode) {
   }
 
-  rti (addr_mode) {
+  rti (addrMode) {
   }
 
-  rts (addr_mode) {
+  rts (addrMode) {
   }
 
-  sbc (addr_mode) {
+  sbc (addrMode) {
   }
 
-  sec (addr_mode) {
+  sec (addrMode) {
     this.setFlag("CARRY");
   }
 
-  sed (addr_mode) {
+  sed (addrMode) {
     this.setFlag("DECIMAL");
   }
 
-  sei (addr_mode) {
+  sei (addrMode) {
     this.setFlag("INTERRUPT");
   }
 
-  sta (addr_mode) {
+  sta (addrMode) {
   }
 
-  stx (addr_mode) {
+  stx (addrMode) {
   }
 
-  sty (addr_mode) {
+  sty (addrMode) {
   }
 
-  tax (addr_mode) {
+  tax (addrMode) {
     this.xReg = this.acc;
     this.setFlagZN(this.xReg);
   }
 
-  tay (addr_mode) {
+  tay (addrMode) {
     this.yReg = this.acc;
     this.setFlagZN(this.yReg);
   }
 
-  tsx (addr_mode) {
+  tsx (addrMode) {
     this.xReg = this.sp;
     this.setFlagZN(this.xReg);
   }
 
-  txa (addr_mode) {
+  txa (addrMode) {
     this.acc = this.xReg;
     this.setFlagZN(this.acc);
   }
 
-  txs (addr_mode) {
+  txs (addrMode) {
     this.sp = this.xReg;
   }
 
-  tya (addr_mode) {
+  tya (addrMode) {
     this.acc = this.yReg;
     this.setFlagZN(this.acc);
   }

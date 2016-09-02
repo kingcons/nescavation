@@ -12,7 +12,7 @@ class Memory {
     console.log(this.cart);
   }
 
-  get_word (address) {
+  getWord (address) {
     return this.memory[address] + (this.memory[address + 1] << 8);
   }
 
@@ -62,58 +62,58 @@ class Memory {
     }
   }
 
-  zero_page (cpu, raw) {
+  zeroPage (cpu, raw) {
     let address = this.memory[cpu.pc];
     return raw ? address : this.memory[address];
   }
 
-  zero_page_x (cpu, raw) {
+  zeroPageX (cpu, raw) {
     let start = this.memory[cpu.pc];
     let address = start + cpu.xReg & 0xff;
     return raw ? address : this.memory[address];
   }
 
-  zero_page_y (cpu, raw) {
+  zeroPageY (cpu, raw) {
     let start = this.memory[cpu.pc];
     let address = start + cpu.yReg & 0xff;
     return raw ? address : this.memory[address];
   }
 
   absolute (cpu, raw) {
-    let address = get_word(cpu.pc);
+    let address = this.getWord(cpu.pc);
     return raw ? address : this.memory[address];
   }
 
-  absolute_x (cpu, raw) {
-    let start = get_word(cpu.pc);
+  absoluteX (cpu, raw) {
+    let start = this.getWord(cpu.pc);
     let address = start + cpu.xReg & 0xffff;
     return raw ? address : this.memory[address];
   }
 
-  absolute_y (cpu, raw) {
-    let start = get_word(cpu.pc);
+  absoluteY (cpu, raw) {
+    let start = this.getWord(cpu.pc);
     let address = start + cpu.yReg & 0xffff;
     return raw ? address : this.memory[address];
   }
 
   // NOTE: Indirect is only used by JMP.
   indirect (cpu) {
-    let start = get_word(cpu.pc);
-    let address = get_word(start);
+    let start = this.getWord(cpu.pc);
+    let address = this.getWord(start);
     return address;
   }
 
-  indirect_x (cpu, raw) {
+  indirectX (cpu, raw) {
     let start = this.memory[cpu.pc];
     let indirect = start + cpu.xReg & 0xff;
-    let address = get_word(indirect);
+    let address = this.getWord(indirect);
     return raw ? address : this.memory[address];
   }
 
-  indirect_y (cpu, raw) {
+  indirectY (cpu, raw) {
     let start = this.memory[cpu.pc];
     let indirect = start + cpu.yReg & 0xff;
-    let address = get_word(indirect);
+    let address = this.getWord(indirect);
     return raw ? address : this.memory[address];
   }
 
