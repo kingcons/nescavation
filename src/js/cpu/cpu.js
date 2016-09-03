@@ -110,7 +110,7 @@ class Cpu {
     CPU Instructions
    ==================
 
-   Remaining: bit, rol, ror, sbc
+   Remaining: bit, sbc
 
    */
 
@@ -281,7 +281,7 @@ class Cpu {
   lsr (addrMode) {
     let operand = addrMode.get(this);
     let result = operand >> 1;
-    if (operand & 1 != 0) { this.setFlag("CARRY"); }
+    if (operand & 1 !== 0) { this.setFlag("CARRY"); }
     this.setFlagNZ(result);
     addrMode.set(this, result);
   }
@@ -315,9 +315,21 @@ class Cpu {
   }
 
   rol (addrMode) {
+    let operand = addrMode.get(this);
+    let result = operand << 1 & 0xff;
+    if (this.getFlag("CARRY") !== 0) { result |= 0x01; }
+    if (operand & 0x80) { this.setFlag("CARRY"); }
+    this.setFlagZN(result);
+    addrMode.set(this, result);
   }
 
   ror (addrMode) {
+    let operand = addrMode.get(this);
+    let result = operand >> 1 & 0xff;
+    if (this.getFlag("CARRY") !== 0) { result |= 0x80; }
+    if (operand & 1 !== 0) { this.setFlag("CARRY"); }
+    this.setFlagZN(result);
+    addrMode.set(this, result);
   }
 
   rti (addrMode) {
