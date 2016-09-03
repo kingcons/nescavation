@@ -110,7 +110,7 @@ class Cpu {
     CPU Instructions
    ==================
 
-   Remaining: bit, eor, ora, rol, ror, sbc
+   Remaining: bit, rol, ror, sbc
 
    */
 
@@ -228,6 +228,9 @@ class Cpu {
   }
 
   eor (addrMode) {
+    let result = this.acc ^ addrMode.get(this);
+    this.setFlagZN(result);
+    this.acc = result;
   }
 
   inc (addrMode) {
@@ -287,6 +290,9 @@ class Cpu {
   }
 
   ora (addrMode) {
+    let result = this.acc | addrMode.get(this);
+    this.setFlagZN(result);
+    this.acc = result;
   }
 
   // FIXME: Any status flag tweaks needed in PHP/PLP?
