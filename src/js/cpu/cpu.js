@@ -41,9 +41,13 @@ class Cpu {
     return this.status &= ~bitmask;
   }
 
+  updateFlag (flag, isEnabled) {
+    isEnabled ? this.setFlag(flag) : this.clearFlag(flag);
+  }
+
   setFlagZN (value) {
-    if (value === 0) { this.setFlag("ZERO"); }
-    if (value & 0x80) { this.setFlag("NEGATIVE"); }
+    this.updateFlag("ZERO", value === 0);
+    this.updateFlag("NEGATIVE", value & 0x80);
   }
 
   compareMem (register, memory) {
