@@ -259,7 +259,7 @@ function buildOp (cpu, version, method, trackPC) {
     if (trackPC) {
       this.pc += bytes - 1;
     }
-  };
+  }.bind(cpu);
 }
 
 function buildOpInfo (method, addrMode, docs) {

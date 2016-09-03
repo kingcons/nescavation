@@ -31,7 +31,7 @@ class Cpu {
     console.log("Instruction", instruction);
     console.log("Opcode", this.opcodes[instruction]);
     console.log("Cpu", this);
-    this.opcodes[instruction].bind(this)();
+    this.opcodes[instruction]();
   }
 
   run () {
