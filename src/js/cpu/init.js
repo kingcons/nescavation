@@ -20,7 +20,7 @@ function initOpcodes (cpu, memory) {
   initOp(cpu, and, cpu.and);
 
   let asl = [[0x06, 2, memory.zeroPage],
-             [0x0a, 1, memory.accumulator],
+             [0x0a, 1, memory.accumulator, true],
              [0x0e, 3, memory.absolute],
              [0x16, 2, memory.zeroPageX],
              [0x1e, 3, memory.absoluteX]];
@@ -97,7 +97,7 @@ function initOpcodes (cpu, memory) {
   initOp(cpu, ldy, cpu.ldy);
 
   let lsr = [[0x46, 2, memory.zeroPage],
-             [0x4a, 1, memory.accumulator],
+             [0x4a, 1, memory.accumulator, true],
              [0x4e, 3, memory.absolute],
              [0x56, 2, memory.zeroPageX],
              [0x5e, 3, memory.absoluteX]];
@@ -113,7 +113,7 @@ function initOpcodes (cpu, memory) {
              [0x1d, 3, memory.absoluteX]];
   initOp(cpu, ora, cpu.ora);
 
-  let rol = [[0x2a, 1, memory.accumulator],
+  let rol = [[0x2a, 1, memory.accumulator, true],
              [0x26, 2, memory.zeroPage],
              [0x2e, 3, memory.absolute],
              [0x36, 2, memory.zeroPageX],
@@ -121,7 +121,7 @@ function initOpcodes (cpu, memory) {
   initOp(cpu, rol, cpu.rol);
 
   let ror = [[0x66, 2, memory.zeroPage],
-             [0x6a, 1, memory.accumulator],
+             [0x6a, 1, memory.accumulator, true],
              [0x6e, 3, memory.absolute],
              [0x76, 2, memory.zeroPageX],
              [0x7e, 3, memory.absoluteX]];
@@ -167,11 +167,11 @@ function initOpcodes (cpu, memory) {
   initOp(cpu, [[0x70, 2, memory.relative]], cpu.bvs, false);
 
   // Jump Instructions
-  let jmp = [[0x4c, 3, memory.absolute],
-             [0x6c, 3, memory.indirect]];
+  let jmp = [[0x4c, 3, memory.absolute, true],
+             [0x6c, 3, memory.indirect, true]];
   initOp(cpu, jmp, cpu.jmp, false);
 
-  initOp(cpu, [[0x20, 3, memory.absolute]], cpu.jsr, false);
+  initOp(cpu, [[0x20, 3, memory.absolute, true]], cpu.jsr, false);
 
   // Clear Flag Instructions
   initOp(cpu, [[0x18, 1, null]], cpu.clc);
@@ -209,12 +209,45 @@ function initOpcodes (cpu, memory) {
   initOp(cpu, [[0x60, 1, null]], cpu.rts);
 }
 
+function loadWrapper (addrMode) {
+  return function (cpu) {
+    let address = addrMode(cpu);
+    return cpu.memory.load(address);
+  };
+}
+
+function storeWrapper (addrMode) {
+  return function (cpu, value) {
+    let address = addrMode(cpu);
+    return cpu.memory.store(address, value);
+  };
+}
+
+function initAccessor (addrMode, raw) {
+  let accessor = {
+    get: loadWrapper(addrMode),
+    set: storeWrapper(addrMode)
+  };
+
+  // KLUDGE: The only raw setter calls are in accumulator mode.
+  // Specifically in asl, lsr, rol, and ror.
+  if (raw) {
+    accessor = {
+      get: addrMode,
+      set: (cpu, value) => { cpu.acc = value; }
+    };
+  }
+
+  return accessor;
+}
+
 function initOp (cpu, versions, method, trackPC = true) {
   versions.forEach( version => {
-    let [op, bytes, addrMode] = version;
+    let [op, bytes, addrMode, raw] = version;
+    let accessor = initAccessor(addrMode, raw);
     cpu.opcodes[op] = function () {
       cpu.pc += 1;
-      method(addrMode);
+      method(accessor);
       if (trackPC) {
         cpu.pc += bytes - 1;
       }

@@ -23,7 +23,7 @@ class Cpu {
   }
 
   reset () {
-    this.pc = this.memory.getWord(0xfffc);
+    this.pc = this.memory.loadWord(0xfffc);
   }
 
   getFlag (flag) {
@@ -104,16 +104,12 @@ run () {
     CPU Instructions
    ==================
 
-   Remaining: asl, bit, cmp, cpx, cpy, dec, eor, inc, lda, ldx, ldy, lsr, ora, rol, ror, sbc, sta, stx, sty
+   Remaining: bit, cmp, cpx, cpy, dec, eor, inc, lda, ldx, ldy, ora, rol, ror, sbc, sta, stx, sty
 
    */
 
-  // FIXME: Figure out addressing mode calling variations!
-  // i.e. raw mode, etc. Set up differently in initOps?
-  // Remember this includes accumulator modes for asl, etc
-
   adc (addrMode) {
-    let result = this.acc + addrMode(this) + this.getFlag("CARRY");
+    let result = this.acc + addrMode.get(this) + this.getFlag("CARRY");
     // TODO: Handle overflow.
     if (result > 0xff) { this.setFlag("CARRY"); }
     if (result & 0xff === 0) { this.setFlag("ZERO"); }
@@ -122,13 +118,18 @@ run () {
   }
 
   and (addrMode) {
-    let result = this.acc & addrMode(this);
+    let result = this.acc & addrMode.get(this);
     if (result === 0) { this.setFlag("ZERO"); }
     if (result & 0x80) { this.setFlag("NEGATIVE"); }
     this.acc = result;
   }
 
   asl (addrMode) {
+    let operand = addrMode.get(this);
+    let result = operand << 1 & 0xff;
+    if (operand & 0x80) { this.setFlag("CARRY"); }
+    this.setFlagNZ(result);
+    addrMode.set(this, result);
   }
 
   bcc (addrMode) {
@@ -165,7 +166,7 @@ run () {
     this.setFlag("BREAK");
     this.stackPush(this.status);
     this.setFlag("INTERRUPT");
-    this.pc = this.memory.getWord(0xfffe);
+    this.pc = this.memory.loadWord(0xfffe);
   }
 
   bvc (addrMode) {
@@ -231,7 +232,7 @@ run () {
   }
 
   jmp (addrMode) {
-    let jumpTo = addrMode(this);
+    let jumpTo = addrMode.get(this);
     this.pc = jumpTo;
   }
 
@@ -239,7 +240,7 @@ run () {
     // Add 2 to move over the jump address to the next opcode.
     let returnTo = this.pc + 2 & 0xffff;
     this.stackPushWord(returnTo);
-    let jumpTo = addrMode(this);
+    let jumpTo = addrMode.get(this);
     this.pc = jumpTo;
   }
 
@@ -253,6 +254,11 @@ run () {
   }
 
   lsr (addrMode) {
+    let operand = addrMode.get(this);
+    let result = operand >> 1;
+    if (operand & 1 != 0) { this.setFlag("CARRY"); }
+    this.setFlagNZ(result);
+    addrMode.set(this, result);
   }
 
   nop (addrMode) {

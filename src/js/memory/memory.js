@@ -12,8 +12,36 @@ class Memory {
     console.log(this.cart);
   }
 
-  getWord (address) {
-    return this.memory[address] + (this.memory[address + 1] << 8);
+  loadWord (address) {
+    return this.load(address) + (this.load(address + 1) << 8);
+  }
+
+  load (address) {
+    if (address < 0x2000) {
+      // load from RAM
+    } else if (address < 0x4000) {
+      // load from PPU
+    } else if (address === 0x4016) {
+      // load from Input
+    } else if (address < 0x4019) {
+      // load from APU
+    } else {
+      // load from mapper
+    }
+  }
+
+  store (address, value) {
+    if (address < 0x2000) {
+      // store into RAM
+    } else if (address < 0x4000) {
+      // store into PPU
+    } else if (address === 0x4016) {
+      // store into Input
+    } else if (address < 0x4019) {
+      // store into APU
+    } else {
+      // store into mapper
+    }
   }
 
   //
@@ -28,97 +56,76 @@ class Memory {
 
    TODO: Dispatch correctly to PPU/APU/RAM/ROM, etc.
 
-   At present, we're just reading this.memory directly.
-   In the future, we should do "the right thing" by
-   checking what region the address is in.
-
-   Ultimately, any CPU instruction has an addressing mode
-   that addressing mode returns a u16 into memory,
-   and we may then read a byte or write a byte to that
-   location.
-
-   The right thing to do is probably replace any
-   direct calls to this.memory[...] with load/store
-   methods that dispatch correctly to the underlying HW.
-
-   This will require reworking the opcodes slightly
-   and figuring out if we need any tweaks for "raw"
-   opcodes. Perhaps we can build closures in the opcode
-   initialization for getting and setting? We've got to
-   extend that to accurately track program counter at
-   some point too.
+   Raw ops == JSR/JMP and Accumulator calls.
+   Deref == operate on the byte *at* the address.
+   Getters always deref except for raw ops.
+   Setters always deref except for Accumulator calls.
 
   */
 
   immediate (cpu) {
-    return this.memory[cpu.pc];
+    return cpu.pc;
   }
 
-  accumulator (cpu, raw) {
-    if (raw) {
-      return cpu.acc;
-    } else {
-      return this.memory[cpu.acc];
-    }
+  accumulator (cpu) {
+    return cpu.acc;
   }
 
-  zeroPage (cpu, raw) {
-    let address = this.memory[cpu.pc];
-    return raw ? address : this.memory[address];
+  zeroPage (cpu) {
+    return this.load(cpu.pc);
   }
 
-  zeroPageX (cpu, raw) {
-    let start = this.memory[cpu.pc];
+  zeroPageX (cpu) {
+    let start = this.load(cpu.pc);
     let address = start + cpu.xReg & 0xff;
-    return raw ? address : this.memory[address];
+    return address;
   }
 
-  zeroPageY (cpu, raw) {
-    let start = this.memory[cpu.pc];
+  zeroPageY (cpu) {
+    let start = this.load(cpu.pc);
     let address = start + cpu.yReg & 0xff;
-    return raw ? address : this.memory[address];
+    return address;
   }
 
-  absolute (cpu, raw) {
-    let address = this.getWord(cpu.pc);
-    return raw ? address : this.memory[address];
+  absolute (cpu) {
+    return this.loadWord(cpu.pc);
   }
 
-  absoluteX (cpu, raw) {
-    let start = this.getWord(cpu.pc);
+  absoluteX (cpu) {
+    let start = this.loadWord(cpu.pc);
     let address = start + cpu.xReg & 0xffff;
-    return raw ? address : this.memory[address];
+    return address;
   }
 
-  absoluteY (cpu, raw) {
-    let start = this.getWord(cpu.pc);
+  absoluteY (cpu) {
+    let start = this.loadWord(cpu.pc);
     let address = start + cpu.yReg & 0xffff;
-    return raw ? address : this.memory[address];
+    return address;
   }
 
   // NOTE: Indirect is only used by JMP.
   indirect (cpu) {
-    let start = this.getWord(cpu.pc);
-    let address = this.getWord(start);
+    let start = this.loadWord(cpu.pc);
+    let address = this.loadWord(start);
     return address;
   }
 
-  indirectX (cpu, raw) {
-    let start = this.memory[cpu.pc];
+  indirectX (cpu) {
+    let start = this.load(cpu.pc);
     let indirect = start + cpu.xReg & 0xff;
-    let address = this.getWord(indirect);
-    return raw ? address : this.memory[address];
+    let address = this.loadWord(indirect);
+    return address;
   }
 
-  indirectY (cpu, raw) {
-    let start = this.memory[cpu.pc];
+  indirectY (cpu) {
+    let start = this.load(cpu.pc);
     let indirect = start + cpu.yReg & 0xff;
-    let address = this.getWord(indirect);
-    return raw ? address : this.memory[address];
+    let address = this.loadWord(indirect);
+    return address;
   }
 
   relative (cpu) {
-    let offset = this.memory[cpu.pc];
+    let offset = this.load(cpu.pc);
     let direction = offset & 0x80;
 
     /*
