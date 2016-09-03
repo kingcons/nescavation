@@ -119,8 +119,7 @@ run () {
 
   and (addrMode) {
     let result = this.acc & addrMode.get(this);
-    if (result === 0) { this.setFlag("ZERO"); }
-    if (result & 0x80) { this.setFlag("NEGATIVE"); }
+    this.setFlagNZ(result);
     this.acc = result;
   }
 
@@ -317,12 +316,15 @@ run () {
   }
 
   sta (addrMode) {
+    addrMode.set(this, this.acc);
   }
 
   stx (addrMode) {
+    addrMode.set(this, this.xReg);
   }
 
   sty (addrMode) {
+    addrMode.set(this, this.yReg);
   }
 
   tax (addrMode) {
