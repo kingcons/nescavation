@@ -17,14 +17,32 @@ class Cpu {
     this.yReg     = 0;      // Y Register
     this.memory   = memory;
     this.opcodes  = {};
+    this.opsInfo  = {};
 
     initOpcodes(this, this.memory);
     this.reset();
+    console.log(this);
   }
 
   reset () {
     this.pc = this.memory.loadWord(0xfffc);
   }
+
+  step () {
+    let instruction = this.memory.load(this.pc);
+    console.log("Instruction", instruction);
+    console.log("Opcode", this.opcodes[instruction]);
+    console.log("Cpu", this);
+    this.opcodes[instruction]();
+  }
+
+  run () {
+    // while (!this.paused) {
+    //   this.step();
+    // }
+  }
+
+  /* Status Register Utilities */
 
   getFlag (flag) {
     let bitmask = 1 << Flag[flag].ordinal;
@@ -49,6 +67,8 @@ class Cpu {
     this.updateFlag("ZERO", value === 0);
     this.updateFlag("NEGATIVE", value & 0x80);
   }
+
+  /* Branch and Compare Utilities */
 
   compareMem (register, memory) {
     let result = register - memory;
@@ -94,20 +114,6 @@ class Cpu {
     return this.stackPop() + (this.stackPop() << 8);
   }
 
-  run () {
-    // while (!this.paused) {
-    //   this.step();
-    // }
-  }
-
-  step () {
-    let instruction = this.memory.load(this.pc);
-    console.log("Instruction", instruction);
-    console.log("Opcode", this.opcodes[instruction]);
-    console.log("Cpu", this);
-    this.opcodes[instruction]();
-  }
-
   /*
 
    ==================
@@ -116,7 +122,6 @@ class Cpu {
 
    */
 
-  // FIXME: Double check flagsZN, especially in adc, sbc.
   // FIXME: Handle overflow in adc, sbc.
 
   adc (addrMode) {
