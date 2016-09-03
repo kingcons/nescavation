@@ -104,7 +104,7 @@ run () {
     CPU Instructions
    ==================
 
-   Remaining: bit, cmp, cpx, cpy, dec, eor, inc, lda, ldx, ldy, ora, rol, ror, sbc, sta, stx, sty
+   Remaining: bit, cmp, dec, eor, inc, lda, ldx, ldy, ora, rol, ror, sbc
 
    */
 
@@ -196,9 +196,15 @@ run () {
   }
 
   cpx (addrMode) {
+    let result = this.xReg - addrMode.get(this);
+    this.setFlagZN(result);
+    if (result >= 0) { this.setFlag("CARRY"); }
   }
 
   cpy (addrMode) {
+    let result = this.yReg - addrMode.get(this);
+    this.setFlagZN(result);
+    if (result >= 0) { this.setFlag("CARRY"); }
   }
 
   dec (addrMode) {
