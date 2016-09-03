@@ -46,6 +46,12 @@ class Cpu {
     if (value & 0x80) { this.setFlag("NEGATIVE"); }
   }
 
+  compareMem (register, memory) {
+    let result = register - memory;
+    this.setFlagZN(result);
+    if (result >= 0) { this.setFlag("CARRY"); }
+  }
+
   branchIf (jump) {
     if (jump) {
       this.pc = this.memory.relative(this);
@@ -84,14 +90,14 @@ class Cpu {
     return this.stackPop() + (this.stackPop() << 8);
   }
 
-run () {
+  run () {
     // while (!this.paused) {
     //   this.step();
     // }
   }
 
   step () {
-    let instruction = this.memory.immediate(this);
+    let instruction = this.memory.load(this.pc);
     console.log("Instruction", instruction);
     console.log("Opcode", this.opcodes[instruction]);
     console.log("Cpu", this);
@@ -104,13 +110,13 @@ run () {
     CPU Instructions
    ==================
 
-   Remaining: bit, cmp, dec, eor, inc, ora, rol, ror, sbc
+   Remaining: bit, eor, ora, rol, ror, sbc
 
    */
 
   adc (addrMode) {
     let result = this.acc + addrMode.get(this) + this.getFlag("CARRY");
-    // TODO: Handle overflow.
+    // FIXME: Handle overflow.
     if (result > 0xff) { this.setFlag("CARRY"); }
     if (result & 0xff === 0) { this.setFlag("ZERO"); }
     if (result & 0x80) { this.setFlag("NEGATIVE"); }
@@ -193,21 +199,22 @@ run () {
   }
 
   cmp (addrMode) {
+    this.compareMem(this.acc, addrMode.get(this));
   }
 
   cpx (addrMode) {
-    let result = this.xReg - addrMode.get(this);
-    this.setFlagZN(result);
-    if (result >= 0) { this.setFlag("CARRY"); }
+    this.compareMem(this.xReg, addrMode.get(this));
   }
 
   cpy (addrMode) {
-    let result = this.yReg - addrMode.get(this);
-    this.setFlagZN(result);
-    if (result >= 0) { this.setFlag("CARRY"); }
+    this.compareMem(this.yReg, addrMode.get(this));
   }
 
   dec (addrMode) {
+    let operand = addrMode.get(this);
+    let result = operand - 1 & 0xff;
+    addrMode.set(this, result);
+    this.setFlagZN(result);
   }
 
   dex (addrMode) {
@@ -224,6 +231,10 @@ run () {
   }
 
   inc (addrMode) {
+    let operand = addrMode.get(this);
+    let result = operand + 1 & 0xff;
+    addrMode.set(this, result);
+    this.setFlagZN(result);
   }
 
   inx (addrMode) {
