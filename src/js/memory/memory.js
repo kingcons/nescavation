@@ -1,15 +1,30 @@
 import { Cartridge } from "./cart";
+import { NROM, MMC1, MMC3 } from "./mappers";
 
 class Memory {
 
   constructor () {
-    this.cart = null;
-    this.memory = new Uint8Array(0x10000);
+    this.mapper = null;
+    this.memory = new Uint8Array(0x800);
+  }
+
+  initMapper (cart) {
+    switch (cart.header.mapperId) {
+    case 0:
+      this.mapper = new NROM(cart); break;
+    case 1:
+      this.mapper = new MMC1(cart); break;
+    case 4:
+      this.mapper = new MMC3(cart); break;
+    default:
+      console.error("This mapper is not supported yet. Sorry!");
+    }
   }
 
   swapCart (data) {
-    this.cart = new Cartridge(data);
-    console.log(this.cart);
+    let cart = new Cartridge(data);
+    this.initMapper(cart);
+    console.log(this.mapper);
   }
 
   loadWord (address) {
@@ -18,29 +33,41 @@ class Memory {
 
   load (address) {
     if (address < 0x2000) {
-      // load from RAM
+      return this.memory[address & 0x7ff];
     } else if (address < 0x4000) {
       // load from PPU
+      return "not implemented";
     } else if (address === 0x4016) {
       // load from Input
+      return "not implemented";
     } else if (address < 0x4019) {
       // load from APU
+      return "not implemented";
+    } else if (address < 0x6000) {
+      // load from SRAM
+      return "not implemented";
     } else {
-      // load from mapper
+      return this.mapper.load(address);
     }
   }
 
   store (address, value) {
     if (address < 0x2000) {
-      // store into RAM
+      return this.memory[address & 0x7ff] = value;
     } else if (address < 0x4000) {
       // store into PPU
+      return "not implemented";
     } else if (address === 0x4016) {
       // store into Input
+      return "not implemented";
     } else if (address < 0x4019) {
       // store into APU
+      return "not implemented";
+    } else if (address < 0x6000) {
+      // store into SRAM
+      return "not implemented";
     } else {
-      // store into mapper
+      return this.mapper.store(address, value);
     }
   }
 
