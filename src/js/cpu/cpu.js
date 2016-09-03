@@ -20,8 +20,6 @@ class Cpu {
     this.opsInfo  = {};
 
     initOpcodes(this, this.memory);
-    this.reset();
-    console.log(this);
   }
 
   reset () {

@@ -5,7 +5,7 @@ class NROM {
   }
 
   load (address) {
-    if (cart.prgCount === 1) {
+    if (this.cart.prgCount === 1) {
       return this.cart.data[address & 0x3fff];
     } else {
       return this.cart.data[address & 0x7fff];
