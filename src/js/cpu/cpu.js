@@ -104,7 +104,7 @@ run () {
     CPU Instructions
    ==================
 
-   Remaining: bit, cmp, dec, eor, inc, lda, ldx, ldy, ora, rol, ror, sbc
+   Remaining: bit, cmp, dec, eor, inc, ora, rol, ror, sbc
 
    */
 
@@ -250,12 +250,18 @@ run () {
   }
 
   lda (addrMode) {
+    this.acc = addrMode.get(this);
+    this.setFlagZN(this.acc);
   }
 
   ldx (addrMode) {
+    this.xReg = addrMode.get(this);
+    this.setFlagZN(this.xReg);
   }
 
   ldy (addrMode) {
+    this.yReg = addrMode.get(this);
+    this.setFlagZN(this.yReg);
   }
 
   lsr (addrMode) {
