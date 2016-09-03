@@ -101,7 +101,7 @@ class Cpu {
     console.log("Instruction", instruction);
     console.log("Opcode", this.opcodes[instruction]);
     console.log("Cpu", this);
-    return this.opcodes[instruction]();
+    this.opcodes[instruction]();
   }
 
   /*
@@ -110,16 +110,15 @@ class Cpu {
     CPU Instructions
    ==================
 
-   Remaining: bit, sbc
-
    */
+
+  // FIXME: Double check flagsZN, especially in adc, sbc.
+  // FIXME: Handle overflow in adc, sbc.
 
   adc (addrMode) {
     let result = this.acc + addrMode.get(this) + this.getFlag("CARRY");
-    // FIXME: Handle overflow.
     if (result > 0xff) { this.setFlag("CARRY"); }
-    if (result & 0xff === 0) { this.setFlag("ZERO"); }
-    if (result & 0x80) { this.setFlag("NEGATIVE"); }
+    this.setFlagZN(result);
     this.acc = result & 0xff;
   }
 
@@ -150,6 +149,10 @@ class Cpu {
   }
 
   bit (addrMode) {
+    let operand = addrMode.get(this);
+    if (operand & 0x40 !== 0) { this.setFlag("OVERFLOW"); }
+    if (operand & 0x80 !== 0) { this.setFlag("NEGATIVE"); }
+    if (operand & this.acc === 0) { this.setFlag("ZERO"); }
   }
 
   bmi (addrMode) {
@@ -342,6 +345,11 @@ class Cpu {
   }
 
   sbc (addrMode) {
+    let result = this.acc - addrMode.get(this);
+    if (this.getFlag("CARRY") === 0) { result -= 1; }
+    if (result >= 0) { this.setFlag("CARRY"); }
+    this.setFlagZN(result);
+    this.acc = result & 0xff;
   }
 
   sec (addrMode) {
