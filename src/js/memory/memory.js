@@ -154,6 +154,7 @@ class Memory {
   relative (cpu) {
     let offset = this.load(cpu.pc);
     let direction = offset & 0x80;
+    let address;
 
     /*
      The top bit in the offset is a direction,
@@ -163,10 +164,10 @@ class Memory {
      */
 
     if (direction === 0) {
-      let address = cpu.pc + offset & 0xffff;
+      address = cpu.pc + offset & 0xffff;
     } else {
       let signed = (offset ^ 0xff) + 1;
-      let address = cpu.pc - signed & 0xffff;
+      address = cpu.pc - signed & 0xffff;
     }
 
     return address;
