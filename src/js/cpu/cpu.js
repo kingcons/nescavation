@@ -131,7 +131,7 @@ class Cpu {
 
   and (addrMode) {
     let result = this.acc & addrMode.get(this);
-    this.setFlagNZ(result);
+    this.setFlagZN(result);
     this.acc = result;
   }
 
@@ -139,7 +139,7 @@ class Cpu {
     let operand = addrMode.get(this);
     let result = operand << 1 & 0xff;
     if (operand & 0x80) { this.setFlag("CARRY"); }
-    this.setFlagNZ(result);
+    this.setFlagZN(result);
     addrMode.set(this, result);
   }
 
@@ -229,12 +229,12 @@ class Cpu {
 
   dex (addrMode) {
     this.xReg = this.xReg - 1 & 0xff;
-    this.setFlagNZ(this.xReg);
+    this.setFlagZN(this.xReg);
   }
 
   dey (addrMode) {
     this.yReg = this.yReg - 1 & 0xff;
-    this.setFlagNZ(this.yReg);
+    this.setFlagZN(this.yReg);
   }
 
   eor (addrMode) {
@@ -252,12 +252,12 @@ class Cpu {
 
   inx (addrMode) {
     this.xReg = this.xReg + 1 & 0xff;
-    this.setFlagNZ(this.xReg);
+    this.setFlagZN(this.xReg);
   }
 
   iny (addrMode) {
     this.yReg = this.yReg + 1 & 0xff;
-    this.setFlagNZ(this.yReg);
+    this.setFlagZN(this.yReg);
   }
 
   jmp (addrMode) {
@@ -292,7 +292,7 @@ class Cpu {
     let operand = addrMode.get(this);
     let result = operand >> 1;
     if (operand & 1 !== 0) { this.setFlag("CARRY"); }
-    this.setFlagNZ(result);
+    this.setFlagZN(result);
     addrMode.set(this, result);
   }
 
@@ -317,7 +317,7 @@ class Cpu {
 
   pla (addrMode) {
     this.acc = this.stackPop();
-    this.setFlagNZ(this.acc);
+    this.setFlagZN(this.acc);
   }
 
   plp (addrMode) {
