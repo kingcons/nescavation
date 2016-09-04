@@ -220,14 +220,14 @@ function initOpcodes (cpu, memory) {
 
 function loadWrapper (addrMode) {
   return function (cpu) {
-    let address = addrMode(cpu);
+    let address = addrMode.call(cpu.memory, cpu);
     return cpu.memory.load(address);
   };
 }
 
 function storeWrapper (addrMode) {
   return function (cpu, value) {
-    let address = addrMode(cpu);
+    let address = addrMode.call(cpu.memory, cpu);
     return cpu.memory.store(address, value);
   };
 }
@@ -242,7 +242,7 @@ function initAccessor (addrMode, raw) {
   // Specifically in asl, lsr, rol, and ror.
   if (raw) {
     accessor = {
-      get: addrMode,
+      get: (cpu) => { addrMode.call(cpu.memory, cpu); },
       set: (cpu, value) => { cpu.acc = value; }
     };
   }

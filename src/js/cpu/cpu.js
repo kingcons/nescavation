@@ -28,9 +28,8 @@ class Cpu {
 
   step () {
     let instruction = this.memory.load(this.pc);
-    console.log("Instruction", instruction);
-    console.log("Opcode", this.opcodes[instruction]);
-    console.log("Cpu", this);
+    console.log(this.opsInfo[instruction].name);
+    console.log(this);
     this.opcodes[instruction]();
   }
 
