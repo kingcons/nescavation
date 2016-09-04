@@ -43,7 +43,7 @@ class Memory {
     } else if (address < 0x4019) {
       // load from APU
       return "not implemented";
-    } else if (address < 0x6000) {
+    } else if (address < 0x8000) {
       // load from SRAM
       return "not implemented";
     } else {
@@ -63,7 +63,7 @@ class Memory {
     } else if (address < 0x4019) {
       // store into APU
       return "not implemented";
-    } else if (address < 0x6000) {
+    } else if (address < 0x8000) {
       // store into SRAM
       return "not implemented";
     } else {
