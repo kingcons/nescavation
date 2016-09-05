@@ -1,7 +1,7 @@
 import $ from 'jquery';
 import _ from 'lodash';
 
-import { Cpu } from "./cpu/cpu";
+import { CPU } from "./cpu/cpu";
 import { Memory } from "./memory/memory";
 
 import { AppController } from "./controllers/app";
@@ -15,7 +15,7 @@ let pageElements = {
   controls: cpuControls,
   disassembly: disassembly
 };
-let cpu = new Cpu(new Memory);
+let cpu = new CPU(new Memory);
 
 let app = new AppController(cpu, pageElements);
 app.init();

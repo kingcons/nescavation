@@ -5,7 +5,7 @@ class Flag extends Enum {}
 Flag.initEnum(["CARRY", "ZERO", "INTERRUPT", "DECIMAL",
                "BREAK", "UNUSED", "OVERFLOW", "NEGATIVE"]);
 
-class Cpu {
+class CPU {
 
   constructor (memory) {
     this.paused   = true;
@@ -413,4 +413,4 @@ class Cpu {
 
 }
 
-export { Cpu };
+export { CPU };
