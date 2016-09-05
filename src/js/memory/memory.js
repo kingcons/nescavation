@@ -1,6 +1,12 @@
 import { Cartridge } from "./cart";
 import { NROM, MMC1, MMC3 } from "./mappers";
 
+const MAPPERS = {
+  0: NROM,
+  1: MMC1,
+  3: MMC3
+};
+
 class Memory {
 
   constructor () {
@@ -9,14 +15,10 @@ class Memory {
   }
 
   initMapper (cart) {
-    switch (cart.header.mapperId) {
-    case 0:
-      this.mapper = new NROM(cart); break;
-    case 1:
-      this.mapper = new MMC1(cart); break;
-    case 4:
-      this.mapper = new MMC3(cart); break;
-    default:
+    let mapper = MAPPERS[cart.header.mapperId];
+    if (mapper) {
+      this.mapper = new mapper(cart);
+    } else {
       console.error("This mapper is not supported yet. Sorry!");
     }
   }
