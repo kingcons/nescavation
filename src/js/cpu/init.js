@@ -233,6 +233,13 @@ function storeWrapper (addrMode) {
 }
 
 function initAccessor (addrMode, raw) {
+  /*
+   Raw ops == JSR/JMP and Accumulator calls.
+   Deref == operate on the byte *at* the address.
+   Getters always deref except for raw ops.
+   Setters always deref except for Accumulator calls.
+   */
+
   let accessor = {
     get: loadWrapper(addrMode),
     set: storeWrapper(addrMode)

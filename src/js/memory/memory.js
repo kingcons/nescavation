@@ -81,17 +81,6 @@ class Memory {
   // FIXME: Handle page wrapping in indirect modes.
   // FIXME: Handle cycle counting correctly. :troll:
 
-  /*
-
-   TODO: Dispatch correctly to PPU/APU/RAM/ROM, etc.
-
-   Raw ops == JSR/JMP and Accumulator calls.
-   Deref == operate on the byte *at* the address.
-   Getters always deref except for raw ops.
-   Setters always deref except for Accumulator calls.
-
-  */
-
   immediate (cpu) {
     return cpu.pc;
   }
