@@ -9,9 +9,10 @@ const MAPPERS = {
 
 class Memory {
 
-  constructor () {
+  constructor (ppu) {
     this.mapper = null;
     this.memory = new Uint8Array(0x800);
+    this.ppu    = ppu;
   }
 
   initMapper (cart) {
@@ -21,6 +22,7 @@ class Memory {
     } else {
       console.error("This mapper is not supported yet. Sorry!");
     }
+    this.ppu.mapper = mapper;
   }
 
   swapCart (data) {
@@ -37,8 +39,7 @@ class Memory {
     if (address < 0x2000) {
       return this.memory[address & 0x7ff];
     } else if (address < 0x4000) {
-      // load from PPU
-      return "not implemented";
+      return this.ppu.load(address);
     } else if (address === 0x4016) {
       // load from Input
       return "not implemented";
@@ -57,8 +58,7 @@ class Memory {
     if (address < 0x2000) {
       return this.memory[address & 0x7ff] = value;
     } else if (address < 0x4000) {
-      // store into PPU
-      return "not implemented";
+      return this.ppu.store(address, value);
     } else if (address === 0x4016) {
       // store into Input
       return "not implemented";
