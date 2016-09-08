@@ -6,15 +6,24 @@ class NROM {
 
   load (address) {
     if (this.cart.prgCount === 1) {
-      return this.cart.data[address & 0x3fff];
+      return this.cart.prgData[address & 0x3fff];
     } else {
-      return this.cart.data[address & 0x7fff];
+      return this.cart.prgData[address & 0x7fff];
     }
   }
 
   store (address, value) {
     return null;
   }
+
+  loadChr (address) {
+    return this.cart.chrData[address];
+  }
+
+  storeChr (address, value) {
+    return null;
+  }
+
 }
 
 class MMC1 {
