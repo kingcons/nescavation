@@ -10,7 +10,7 @@ const MAPPERS = {
 class Cartridge {
 
   constructor (data) {
-    let header = data.splice(0, 16);
+    let header = data.subarray(0, 16);
     let mapperHighBits = header[7] >>> 4;
     let mapperLowBits  = header[6] >>> 4;
     let mapperId = Math.pow(mapperHighBits, 4) + mapperLowBits;
@@ -29,8 +29,8 @@ class Cartridge {
       mirroring: header[6] & 255 ? "vertical" : "horizontal"
     };
 
-    this.prgData = data.splice(0, this.header.prgSize);
-    this.chrData = data;
+    this.prgData = data.subarray(16, this.header.prgSize + 16);
+    this.chrData = data.subarray(16 + this.header.prgSize);
 
   }
 
