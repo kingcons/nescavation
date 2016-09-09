@@ -67,10 +67,10 @@ class PPU {
 
     // REMINDER: The pattern table data is in cart CHR.
     this.VRAM = {
-      nameTables: new UInt8Array(0x800),
-      paletteTable: new UInt8Array(0x20)
+      nameTables: new Uint8Array(0x800),
+      paletteTable: new Uint8Array(0x20)
     };
-    this.OAM = new UInt8Array(0x100);
+    this.OAM = new Uint8Array(0x100);
     this.mapper = null;
   }
 
