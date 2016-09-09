@@ -1,3 +1,7 @@
+// References:
+//   * http://tuxnes.sourceforge.net/mappers-0.80.txt
+//   * http://nesdev.com/mmc1.txt
+
 class NROM {
 
   constructor (cart) {

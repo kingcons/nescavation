@@ -7,6 +7,9 @@ const MAPPERS = {
   5: "MMC5"
 };
 
+// References:
+//   * http://fms.komkon.org/EMUL8/NES.html#LABM
+
 class Cartridge {
 
   constructor (data) {
