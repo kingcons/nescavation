@@ -30,7 +30,7 @@ class Cartridge {
     };
 
     this.prgData = data.splice(0, this.header.prgSize);
-    this.chrData = data.slice(0, this.header.chrSize);
+    this.chrData = data;
 
   }
 
