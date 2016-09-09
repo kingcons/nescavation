@@ -99,7 +99,6 @@ class PPU {
   store (address, value) {
     switch (address & 7) {
     case 0:
-      // TODO: update_ppuctrl
       this.registers.control = value; break;
     case 1:
       this.registers.mask = value; break;
@@ -111,7 +110,8 @@ class PPU {
       this.OAM[this.oam_address] = value;
       this.oam_address += 1; break;
     case 5:
-      // TODO: update_scroll
+      // TODO: How does PPU scrolling *actually* work tho?
+      // see: http://wiki.nesdev.com/w/index.php/PPU_scrolling
       break;
     case 6:
       this.updatePpuAddress(value);
