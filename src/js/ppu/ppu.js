@@ -4,10 +4,11 @@
     various references were consulted in the process of
     writing this code. A few are listed here:
 
-  * http://nesdev.icequake.net/nes.txt
-  * http://problemkaputt.de/everynes.txt -- I/O Map section especially
-  * http://wiki.nesdev.com/w/index.php/PPU_registers
-  * http://www.thealmightyguru.com/Games/Hacking/Wiki/index.php?title=NES_Palette
+  * [1] http://nesdev.icequake.net/nes.txt
+  * [2] http://problemkaputt.de/everynes.txt -- I/O Map section especially
+  * [3] http://wiki.nesdev.com/w/index.php/PPU_registers
+  * [4] http://www.thealmightyguru.com/Games/Hacking/Wiki/index.php?title=NES_Palette
+  * [5] http://forums.nesdev.com/viewtopic.php?f=2&t=6424
 
  */
 
@@ -49,7 +50,7 @@ class PPU {
       scroll:      {
         x:     0,
         y:     0,
-        next: "X"
+        next:  "X"
       },
       address:     {
         value: 0,
@@ -84,11 +85,10 @@ class PPU {
       this.registers.scroll.next = "X";
       this.registers.address.byte = "High";
       result = this.registers.status; break;
-    case 4:
-      result = this.loadOAM(); break;
     case 7:
       result = this.loadVRAM(); break;
     case 3:  // SPR-RAM Address, Write Only.
+    case 4:  // OAM Reading, "Never meant to be read"[5].
     case 5:  // PPU Scroll, Write Only.
     case 6:  // PPU Address, Write Only.
       result = 0; break;
@@ -108,13 +108,13 @@ class PPU {
     case 3:
       this.registers.oam_address = value; break;
     case 4:
-      // TODO: write_oamdata
-      this.storeOAM(value); break;
+      this.OAM[this.oam_address] = value;
+      this.oam_address += 1; break;
     case 5:
       // TODO: update_scroll
       break;
     case 6:
-      // TODO: update_address (val)
+      this.updatePpuAddress(value);
       break;
     case 7:
       this.storeVRAM(value); break;
@@ -146,6 +146,19 @@ class PPU {
     }
 
     this.updateVramAddress();
+  }
+
+  updatePpuAddress (value) {
+    let previous = this.registers.address.value;
+    let newAddress = null;
+    if (this.registers.address.next === "High") {
+      newAddress = previous & 0x00ff | (value << 8);
+      this.registers.address.next = "Low";
+    } else {
+      newAddress = previous & 0xff00 | value;
+      this.registers.address.next = "High";
+    }
+    this.registers.address.value = newAddress;
   }
 
   updateVramAddress () {
