@@ -1,3 +1,5 @@
+import { disassembleRange } from "../utils/disassembler";
+
 class AppController {
 
   constructor (cpu, {state, controls, disassembly}) {
@@ -12,6 +14,7 @@ class AppController {
     this.romLoadHandler();
     this.playPauseHandler();
     this.stepHandler();
+    this.disasmHandler();
   }
 
   swapCartridge () {
@@ -19,6 +22,17 @@ class AppController {
     this.cpu.memory.swapCart(data);
     this.cpu.reset();
     console.log(this.cpu);
+  }
+
+  updateDisassembly () {
+    let results = disassembleRange(this.cpu, 0x20);
+    let format  = ([a, h, c]) => `<p>${a} | ${h} | ${c}</p>`;
+    let html = `<div>
+      <p>Address  |  Hexdump  |  Code</p>
+      ${results.map(format).join("")}
+      </div>
+    `;
+    this.disassembly.html(html);
   }
 
   romLoadHandler () {
@@ -45,6 +59,12 @@ class AppController {
   stepHandler () {
     this.controls.find(".step").on("click", event => {
       this.cpu.step();
+    });
+  }
+
+  disasmHandler () {
+    this.controls.find(".disassemble").on("click", event => {
+      this.updateDisassembly();
     });
   }
 
