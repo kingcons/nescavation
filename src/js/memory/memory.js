@@ -3,8 +3,7 @@ import { NROM, MMC1, MMC3 } from "./mappers";
 
 const MAPPERS = {
   0: NROM,
-  1: MMC1,
-  3: MMC3
+  1: MMC1
 };
 
 class Memory {
@@ -31,6 +30,14 @@ class Memory {
     console.log(this.mapper);
   }
 
+  getRange (start, end) {
+    let results = [];
+    for (var i = start; i < end; i++) {
+      results.push(this.load(i));
+    }
+    return results;
+  }
+
   loadWord (address) {
     return this.load(address) + (this.load(address + 1) << 8);
   }
@@ -42,13 +49,13 @@ class Memory {
       return this.ppu.load(address);
     } else if (address === 0x4016) {
       // load from Input
-      return "not implemented";
+      return 0; // Not implemented yet!
     } else if (address < 0x4019) {
       // load from APU
-      return "not implemented";
+      return 0; // Not implemented yet!
     } else if (address < 0x8000) {
       // load from SRAM
-      return "not implemented";
+      return 0; // Not implemented yet!
     } else {
       return this.mapper.load(address);
     }
