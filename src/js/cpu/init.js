@@ -269,11 +269,13 @@ function buildOp (cpu, version, method, trackPC) {
   }.bind(cpu);
 }
 
-function buildOpInfo (method, addrMode, docs) {
+function buildOpInfo (method, args, docs) {
+  let [bytes, addrMode] = args;
   return {
     name: method.name.toUpperCase(),
     addrMode: addrMode ? addrMode.name : "implied",
-    docs: docs
+    docs: docs,
+    size: bytes
   };
 }
 
@@ -281,7 +283,7 @@ function initOp (cpu, versions, method, docs, trackPC = true) {
   versions.forEach( version => {
     let [op, ...args] = version;
     cpu.opcodes[op] = buildOp(cpu, args, method, trackPC);
-    cpu.opsInfo[op] = buildOpInfo(method, args[1], docs);
+    cpu.opsInfo[op] = buildOpInfo(method, args, docs);
   });
 }
 
