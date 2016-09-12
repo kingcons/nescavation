@@ -59,6 +59,7 @@ class AppController {
   stepHandler () {
     this.controls.find(".step").on("click", event => {
       this.cpu.step();
+      this.updateDisassembly();
     });
   }
 
