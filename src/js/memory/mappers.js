@@ -1,6 +1,7 @@
 // References:
 //   * http://tuxnes.sourceforge.net/mappers-0.80.txt
 //   * http://nesdev.com/mmc1.txt
+//   * https://wiki.nesdev.com/w/index.php/MMC1
 
 class NROM {
 
@@ -32,11 +33,125 @@ class NROM {
 
 class MMC1 {
 
-  constructor (cart) {}
+  constructor (cart) {
+    this.cart = cart;
+    this.registers = {
+      control:  0x0c,
+      chrBank1: 0,
+      chrBank2: 0,
+      prgBank:  0
+    };
+    this.accumulator = 0;
+    this.writeCount  = 0;
+  }
 
-  load (address) {}
+  reset () {
+    this.registers.control = this.registers.control | 0x0c;
+    this.accumulator = 0;
+    this.writeCount = 0;
+  }
 
-  store (address, value) {}
+  updateRegister (address) {
+    if (address < 0xA000) {
+      this.registers.control = this.accumulator;
+    } else if (address < 0xC000) {
+      this.registers.chrBank1 = this.accumulator;
+    } else if (address < 0xE000) {
+      this.registers.chrBank2 = this.accumulator;
+    } else {
+      this.registers.prgBank = this.accumulator;
+    }
+  }
+
+  getPrgMode () {
+    let prgBits = this.registers.control >> 2 & 3;
+    let mode = null;
+
+    switch (prgBits) {
+    case 0:
+    case 1:
+      mode = "32K";
+    case 2:
+      mode = "FixLow";
+    case 3:
+      mode = "FixHigh";
+    }
+
+    return mode;
+  }
+
+  getLowBank () {
+    let mode = this.getPrgMode();
+    let bank = null;
+
+    switch (mode) {
+    case "32K":
+      bank = this.registers.prgBank & 0xfe;
+    case "FixLow":
+      bank = 0;
+    case "FixHigh":
+      bank = this.registers.prgBank;
+    }
+
+    return bank;
+  }
+
+  getHighBank () {
+    let mode = this.getPrgMode();
+    let bank = null;
+
+    switch (mode) {
+    case "32K":
+      bank = this.registers.prgBank | 1;
+    case "FixLow":
+      bank = this.registers.prgBank;
+    case "FixHigh":
+      bank = this.cart.header.prgCount - 1;
+    }
+
+    return bank;
+  }
+
+  load (address) {
+    if (address < 0xC000) {
+      let bank = this.getLowBank();
+      let index = bank * 0x4000 + (address & 0x3fff);
+      return this.cart.prgData[index];
+    } else {
+      let bank = this.getHighBank();
+      let index = bank * 0x4000 + (address & 0x3fff);
+      return this.cart.prgData[index];
+    }
+  }
+
+  store (address, value) {
+    let resetBit = value & 0x80;
+    if (resetBit !== 0) {
+      this.reset();
+      return;
+    }
+
+    let updateBit = (value & 1) << this.writeCount;
+    this.accumulator = this.accumulator | updateBit;
+
+    if (this.writeCount === 5) {
+      this.updateRegister(address);
+      this.writeCount = 0;
+      this.accumulator = 0;
+    }
+  }
+
+  loadChr (address) {
+    let bank = address < 0x1000 ? this.registers.chrBank1 : this.registers.chrBank2;
+    let index = bank * 0x1000 + (address & 0xfff);
+    return this.cart.chrData[index];
+  }
+
+  storeChr (address, value) {
+    let bank = address < 0x1000 ? this.registers.chrBank1 : this.registers.chrBank2;
+    let index = bank * 0x1000 + (address & 0xfff);
+    return this.cart.chrData[index] = value;
+  }
 
 }
 

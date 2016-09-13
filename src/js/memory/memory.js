@@ -18,10 +18,10 @@ class Memory {
     let mapper = MAPPERS[cart.header.mapperId];
     if (mapper) {
       this.mapper = new mapper(cart);
+      this.ppu.mapper = this.mapper;
     } else {
       console.error("This mapper is not supported yet. Sorry!");
     }
-    this.ppu.mapper = mapper;
   }
 
   swapCart (data) {
