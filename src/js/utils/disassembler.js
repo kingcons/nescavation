@@ -1,8 +1,8 @@
 const TWO_BYTE_MODES = ["absolute", "absoluteX", "absoluteY", "indirect"];
 
 const FORMATTERS = {
-  "implied":      function () { return ""; },
-  "accumulator":  function () { return "A"; },
+  "implied":      () => "",
+  "accumulator":  () => "A",
   "immediate":    immediateArgs,
   "zeroPage":     zeroPageArgs,
   "zeroPageX":    zeroPageXArgs,
