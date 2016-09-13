@@ -28,7 +28,6 @@ class AppController {
   updateDisassembly () {
     let results = disassembleRange(this.cpu, 0x20);
     let html = disasmTmpl(results);
-    console.log(html);
     this.disassembly.html(html);
   }
 
