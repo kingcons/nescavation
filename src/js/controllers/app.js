@@ -1,4 +1,5 @@
 import { disassembleRange } from "../utils/disassembler";
+import { disasmTmpl } from "../templates/disassembler";
 
 class AppController {
 
@@ -26,12 +27,8 @@ class AppController {
 
   updateDisassembly () {
     let results = disassembleRange(this.cpu, 0x20);
-    let format  = ([a, h, c]) => `<p>${a} | ${h} | ${c}</p>`;
-    let html = `<div>
-      <p>Address  |  Hexdump  |  Code</p>
-      ${results.map(format).join("")}
-      </div>
-    `;
+    let html = disasmTmpl(results);
+    console.log(html);
     this.disassembly.html(html);
   }
 
