@@ -123,7 +123,7 @@ function disassemble (opsInfo, start, size, bytes) {
 
     let address = toHex(start + count, 4);
     let hexdump = hexify(segment, " ");
-    let disasm  = isCode ? disassembleOp(opsInfo, segment) : null;
+    let disasm  = isCode ? disassembleOp(opsInfo, segment) : "";
 
     results.push([address, hexdump, disasm]);
     count += segment.length;

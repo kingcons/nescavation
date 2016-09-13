@@ -1,5 +1,6 @@
 import { disassembleRange } from "../utils/disassembler";
-import { disasmTmpl } from "../templates/disassembler";
+import { disasmTmpl } from "../templates/disasm.tmpl";
+import { cpuRegTmpl } from "../templates/cpu-regs.tmpl";
 
 class AppController {
 
