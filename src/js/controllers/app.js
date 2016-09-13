@@ -22,6 +22,7 @@ class AppController {
     let data = new Uint8Array(this.reader.result);
     this.cpu.memory.swapCart(data);
     this.cpu.reset();
+    this.updateDisassembly();
     console.log(this.cpu);
   }
 
@@ -55,12 +56,6 @@ class AppController {
   stepHandler () {
     this.controls.find(".step").on("click", event => {
       this.cpu.step();
-      this.updateDisassembly();
-    });
-  }
-
-  disasmHandler () {
-    this.controls.find(".disassemble").on("click", event => {
       this.updateDisassembly();
     });
   }
