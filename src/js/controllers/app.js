@@ -16,7 +16,6 @@ class AppController {
     this.romLoadHandler();
     this.playPauseHandler();
     this.stepHandler();
-    this.disasmHandler();
   }
 
   swapCartridge () {
@@ -24,13 +23,18 @@ class AppController {
     this.cpu.memory.swapCart(data);
     this.cpu.reset();
     this.updateDisassembly();
-    console.log(this.cpu);
   }
 
   updateDisassembly () {
     let results = disassembleRange(this.cpu, 0x20);
     let html = disasmTmpl(results);
     this.disassembly.html(html);
+  }
+
+  updateCpuState () {
+    let html = cpuRegTmpl(this.cpu);
+    console.log(html);
+    this.controls.find(".cpu-state").html(html);
   }
 
   romLoadHandler () {
@@ -58,6 +62,7 @@ class AppController {
     this.controls.find(".step").on("click", event => {
       this.cpu.step();
       this.updateDisassembly();
+      this.updateCpuState();
     });
   }
 

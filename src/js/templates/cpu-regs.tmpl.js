@@ -18,7 +18,7 @@ function cpuRegTmpl (cpu) {
           <td>$${cpu.yReg.toString(16)}</td>
           <td>$${cpu.pc.toString(16)}</td>
           <td>$${cpu.sp.toString(16)}</td>
-          <td>#${cpu.sr.toString(2)}</td>
+          <td>#${cpu.status.toString(2)}</td>
         </tr>
       </tbody>
     </table>
