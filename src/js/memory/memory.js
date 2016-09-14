@@ -1,9 +1,11 @@
 import { Cartridge } from "./cart";
-import { NROM, MMC1, MMC3 } from "./mappers";
+import { NROM, MMC1, UNROM, CNROM, MMC3 } from "./mappers";
 
 const MAPPERS = {
   0: NROM,
-  1: MMC1
+  1: MMC1,
+  2: UNROM,
+  3: CNROM
 };
 
 class Memory {

@@ -113,15 +113,16 @@ class MMC1 {
   }
 
   load (address) {
+    let bankOffset;
+
     if (address < 0xC000) {
-      let bank = this.getLowBank();
-      let index = bank * 0x4000 + (address & 0x3fff);
-      return this.cart.prgData[index];
+      let bankOffset = this.getLowBank() * 0x4000;
     } else {
-      let bank = this.getHighBank();
-      let index = bank * 0x4000 + (address & 0x3fff);
-      return this.cart.prgData[index];
+      let bankOffset = this.getHighBank() * 0x4000;
     }
+
+    let index = bankOffset + (address & 0x3fff);
+    return this.cart.prgData[index];
   }
 
   store (address, value) {
@@ -155,6 +156,79 @@ class MMC1 {
 
 }
 
+class UNROM {
+
+  constructor (cart) {
+    this.cart = cart;
+    this.prgBank1 = 0;
+    this.prgBank2 = cart.header.prgCount - 1;
+  }
+
+  load (address) {
+    let bankOffset;
+
+    if (address < 0xC000) {
+      bankOffset = this.prgBank1 * 0x4000;
+    } else {
+      bankOffset = this.prgBank2 * 0x4000;
+    }
+
+    let index = bankOffset + (address & 0x3fff);
+    return this.cart.prgData[index];
+  }
+
+  store (address, value) {
+    this.prgBank1 = value & 0xf;
+  }
+
+  loadChr (address) {
+    return this.cart.chrData[address];
+  }
+
+  storeChr (address, value) {
+    return this.cart.chrData[address] = value;
+  }
+
+}
+
+class CNROM {
+
+  constructor (cart) {
+    this.cart = cart;
+    this.chrBank  = 0;
+    this.prgBank1 = 0;
+    this.prgBank2 = cart.header.prgCount - 1;
+  }
+
+  load (address) {
+    let bankOffset;
+
+    if (address < 0xC000) {
+      bankOffset = this.prgBank1 * 0x4000;
+    } else {
+      bankOffset = this.prgBank2 * 0x4000;
+    }
+
+    let index = bankOffset + (address & 0x3fff);
+    return this.cart.prgData[index];
+  }
+
+  store (address, value) {
+    this.chrBank = value & 0x3;
+  }
+
+  loadChr (address) {
+    let index = this.chrBank * 0x2000 + (address & 0x1fff);
+    return this.cart.chrData[index];
+  }
+
+  storeChr (address, value) {
+    let index = this.chrBank * 0x2000 + (address & 0x1fff);
+    return this.cart.chrData[index] = value;
+  }
+
+}
+
 class MMC3 {
 
   constructor (cart) {}
@@ -165,4 +239,4 @@ class MMC3 {
 
 }
 
-export { NROM, MMC1, MMC3 };
+export { NROM, MMC1, UNROM, CNROM, MMC3 };

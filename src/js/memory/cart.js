@@ -35,6 +35,10 @@ class Cartridge {
     this.prgData = data.subarray(16, this.header.prgSize + 16);
     this.chrData = data.subarray(16 + this.header.prgSize);
 
+    // Make sure to add CHR-RAM if CHR-ROM is not present.
+    if (this.header.chrCount === 0) {
+      this.chrData = new Uint8Array(0x2000);
+    }
   }
 
 }
