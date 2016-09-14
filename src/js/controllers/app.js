@@ -33,7 +33,6 @@ class AppController {
 
   updateCpuState () {
     let html = cpuRegTmpl(this.cpu);
-    console.log(html);
     this.controls.find(".cpu-state").html(html);
   }
 
