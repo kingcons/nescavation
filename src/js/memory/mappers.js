@@ -2,6 +2,8 @@
 //   * http://tuxnes.sourceforge.net/mappers-0.80.txt
 //   * http://nesdev.com/mmc1.txt
 //   * https://wiki.nesdev.com/w/index.php/MMC1
+//   * https://wiki.nesdev.com/w/index.php/CHR_ROM_vs._CHR_RAM
+
 
 class NROM {
 
@@ -116,9 +118,9 @@ class MMC1 {
     let bankOffset;
 
     if (address < 0xC000) {
-      let bankOffset = this.getLowBank() * 0x4000;
+      bankOffset = this.getLowBank() * 0x4000;
     } else {
-      let bankOffset = this.getHighBank() * 0x4000;
+      bankOffset = this.getHighBank() * 0x4000;
     }
 
     let index = bankOffset + (address & 0x3fff);
