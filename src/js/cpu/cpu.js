@@ -8,7 +8,6 @@ Flag.initEnum(["CARRY", "ZERO", "INTERRUPT", "DECIMAL",
 class CPU {
 
   constructor (memory) {
-    this.paused   = true;
     this.pc       = 0;      // Program Counter
     this.sp       = 0xfd;   // Stack Pointer
     this.status   = 0x24;   // Status Register
@@ -18,6 +17,8 @@ class CPU {
     this.memory   = memory;
     this.opcodes  = {};
     this.opsInfo  = {};
+    this.paused   = true;
+    this.cc       = 0;      // Cycle Count
 
     initOpcodes(this, this.memory);
   }
