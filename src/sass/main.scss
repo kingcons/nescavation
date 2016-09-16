@@ -7,6 +7,7 @@
 
 .nes-window {
     background-color: $blue;
+    min-width: 300px;
 }
 
 .nes-controls {
@@ -15,6 +16,7 @@
 }
 
 .nes-disassembly {
+    max-width: 50%;
     background-color: $black;
 }
 
