@@ -157,9 +157,9 @@ class CPU {
 
   bit (addrMode) {
     let operand = addrMode.get(this);
-    if (operand & 0x40 !== 0) { this.setFlag("OVERFLOW"); }
-    if (operand & 0x80 !== 0) { this.setFlag("NEGATIVE"); }
-    if (operand & this.acc === 0) { this.setFlag("ZERO"); }
+    if ((operand & 0x40) !== 0) { this.setFlag("OVERFLOW"); }
+    if ((operand & 0x80) !== 0) { this.setFlag("NEGATIVE"); }
+    if ((operand & this.acc) === 0) { this.setFlag("ZERO"); }
   }
 
   bmi (addrMode) {
