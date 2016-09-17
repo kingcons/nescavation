@@ -28,6 +28,11 @@ function toHex (number, length=2) {
   return padWith(hexStr, length, 0);
 }
 
+function toBits (number, length=8) {
+  let bitStr = number.toString(2);
+  return padWith(bitStr, length, 0);
+}
+
 function hexify(args, joiner="") {
   return args.map(x => toHex(x)).join(joiner);
 }
@@ -137,4 +142,4 @@ function disassembleRange (cpu, size) {
   return disassemble(cpu.opsInfo, cpu.pc, size, bytes);
 }
 
-export { disassemble, disassembleRange };
+export { disassemble, disassembleRange, toHex, toBits };

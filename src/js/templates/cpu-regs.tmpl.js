@@ -1,3 +1,5 @@
+import { toHex, toBits } from "../utils/disassembler";
+
 function cpuRegTmpl (cpu) {
   return `
     <table class="table">
@@ -8,17 +10,17 @@ function cpuRegTmpl (cpu) {
           <th>Y Register</th>
           <th>Program Counter</th>
           <th>Stack Pointer</th>
-          <th>Status Register</th>
+          <th>(NV-BDIZC) Status Register</th>
         </tr>
       </thead>
       <tbody>
         <tr>
-          <td>$${cpu.acc.toString(16)}</td>
-          <td>$${cpu.xReg.toString(16)}</td>
-          <td>$${cpu.yReg.toString(16)}</td>
-          <td>$${cpu.pc.toString(16)}</td>
-          <td>$${cpu.sp.toString(16)}</td>
-          <td>#${cpu.status.toString(2)}</td>
+          <td>$${toHex(cpu.acc)}</td>
+          <td>$${toHex(cpu.xReg)}</td>
+          <td>$${toHex(cpu.yReg)}</td>
+          <td>$${toHex(cpu.pc)}</td>
+          <td>$${toHex(cpu.sp)}</td>
+          <td>#${toBits(cpu.status)}</td>
         </tr>
       </tbody>
     </table>
