@@ -25,6 +25,7 @@ class AppController {
     this.romLoadHandler();
     this.playPauseHandler();
     this.stepHandler();
+    this.stepFrameHandler();
   }
 
   swapCartridge () {
@@ -65,6 +66,12 @@ class AppController {
     });
   }
 
+  stepFrameHandler () {
+    this.controls.find(".step-frame").on("click", event => {
+      this.stepFrame();
+    });
+  }
+
   playPauseHandler () {
     this.controls.find(".play").on("click", event => {
       this.paused = !this.paused;
@@ -100,6 +107,8 @@ class AppController {
 
     // Reset CPU/PPU cycle count here?
     // this.cpu.cc = this.cpu.cc - catchup;
+    let overtime = this.cpu.cc - (prevCycles + todoCycles);
+    console.log(`Working overtime: ${overtime} cycles`);
   }
 
   stepFrame () {
