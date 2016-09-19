@@ -121,6 +121,7 @@ function findNextSegment (opsInfo, start, bytes) {
 function disassemble (opsInfo, start, size, bytes) {
   let results = [];
   let count = 0;
+  if (bytes.length === 0) { throw "Nothing to disassemble!"; }
 
   while (count < size) {
     let segment = findNextSegment(opsInfo, count, bytes);
