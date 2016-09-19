@@ -79,7 +79,8 @@ class AppController {
 
       let text = event.target.innerHTML;
       if (text === "Play") {
-        this.frameId = window.requestAnimationFrame(this.run);
+        let runCallback = this.run.bind(this);
+        this.frameId = window.requestAnimationFrame(runCallback);
         event.target.innerHTML = "Pause";
       } else {
         event.target.innerHTML = "Play";
@@ -115,7 +116,8 @@ class AppController {
 
   run (currentTime) {
     if (!this.paused) {
-      this.frameId = window.requestAnimationFrame(this.run);
+      let runCallback = this.run.bind(this);
+      this.frameId = window.requestAnimationFrame(runCallback);
     }
 
     let cycles = this.cpu.cc;
