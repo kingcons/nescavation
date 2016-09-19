@@ -5,6 +5,10 @@ import { cpuRegTmpl } from "../templates/cpu-regs.tmpl";
 const CPU_CYCLES_PER_MS = 1789.772;
 const CPU_CYCLES_PER_FRAME = 29780;
 
+// References:
+// [1] https://developer.mozilla.org/en-US/docs/Games/Anatomy
+// [2] http://wiki.nesdev.com/w/index.php/Clock_rate
+
 class AppController {
 
   constructor (cpu, {state, controls, disassembly}) {
@@ -88,20 +92,33 @@ class AppController {
     }
   }
 
-  run (currentTime) {
-    let cycles = this.cpu.cc;
-    let catchup = this.getWorkAmount(currentTime);
-
-    while (this.cpu.cc - cycles < catchup) {
+  stepNintendo (prevCycles, todoCycles) {
+    while (this.cpu.cc - prevCycles < todoCycles) {
       let step = this.cpu.step();
       // ppuStep = this.ppu.step(step * 3); // PPU runs at 3 * CPU clock
     }
 
     // Reset CPU/PPU cycle count here?
     // this.cpu.cc = this.cpu.cc - catchup;
+  }
 
-    this.lastFrameAt = window.performance.now();
-    if (!this.paused) { window.requestAnimationFrame(this.run); }
+  stepFrame () {
+    this.stepNintendo(this.cpu.cc, CPU_CYCLES_PER_FRAME);
+    this.updateInfo();
+  }
+
+  run (currentTime) {
+    if (!this.paused) {
+      this.frameId = window.requestAnimationFrame(this.run);
+    }
+
+    let cycles = this.cpu.cc;
+    let catchup = this.getWorkAmount(currentTime);
+    this.stepNintendo(cycles, catchup);
+
+    this.lastFrameAt = currentTime;
+    let stepDuration = window.performance.now() - currentTime;
+    console.log(`Step took ${stepDuration} milliseconds`);
   }
 
 };
