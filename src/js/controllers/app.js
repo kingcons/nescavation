@@ -68,7 +68,8 @@ class AppController {
 
   stepFrameHandler () {
     this.controls.find(".step-frame").on("click", event => {
-      this.stepFrame();
+      this.stepNintendo(this.cpu.cc, CPU_CYCLES_PER_FRAME);
+      this.updateInfo();
     });
   }
 
@@ -101,19 +102,15 @@ class AppController {
 
   stepNintendo (prevCycles, todoCycles) {
     while (this.cpu.cc - prevCycles < todoCycles) {
-      let step = this.cpu.step();
+      this.cpu.step();
       // ppuStep = this.ppu.step(step * 3); // PPU runs at 3 * CPU clock
     }
 
-    // Reset CPU/PPU cycle count here?
-    // this.cpu.cc = this.cpu.cc - catchup;
     let overtime = this.cpu.cc - (prevCycles + todoCycles);
     console.log(`Working overtime: ${overtime} cycles`);
-  }
 
-  stepFrame () {
-    this.stepNintendo(this.cpu.cc, CPU_CYCLES_PER_FRAME);
-    this.updateInfo();
+    // Reset CPU/PPU cycle count here?
+    // this.cpu.cc = this.cpu.cc - todoCycles;
   }
 
   run (currentTime) {
