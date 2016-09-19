@@ -2,14 +2,19 @@ import { disassembleRange } from "../utils/disassembler";
 import { disasmTmpl } from "../templates/disasm.tmpl";
 import { cpuRegTmpl } from "../templates/cpu-regs.tmpl";
 
+const CPU_CYCLES_PER_MS = 1789.772;
+const CPU_CYCLES_PER_FRAME = 29780;
+
 class AppController {
 
   constructor (cpu, {state, controls, disassembly}) {
-    this.cpu = cpu;
     this.reader = new FileReader();
     this.state = state;
     this.controls = controls;
     this.disassembly = disassembly;
+    this.cpu = cpu;
+    this.paused = true;
+    this.lastFrameAt = null;
   }
 
   init () {
@@ -23,6 +28,11 @@ class AppController {
     this.cpu.memory.swapCart(data);
     this.cpu.reset();
     this.updateDisassembly();
+  }
+
+  updateInfo () {
+    this.updateDisassembly();
+    this.updateCpuState();
   }
 
   updateDisassembly () {
@@ -44,25 +54,54 @@ class AppController {
     });
   }
 
-  playPauseHandler () {
-    // this.controls.find(".play").on("click", event => {
-    //   let text = event.target.innerHTML;
-    //   if (text === "Play") {
-    //     event.target.innerHTML = "Pause";
-    //   } else {
-    //     event.target.innerHTML = "Play";
-    //   }
-    //   this.cpu.paused = !this.cpu.paused;
-    //   this.cpu.run();
-    // });
-  }
-
   stepHandler () {
     this.controls.find(".step").on("click", event => {
       this.cpu.step();
-      this.updateDisassembly();
-      this.updateCpuState();
+      this.updateInfo();
     });
+  }
+
+  playPauseHandler () {
+    this.controls.find(".play").on("click", event => {
+      this.paused = !this.paused;
+
+      let text = event.target.innerHTML;
+      if (text === "Play") {
+        this.frameId = window.requestAnimationFrame(this.run);
+        event.target.innerHTML = "Pause";
+      } else {
+        event.target.innerHTML = "Play";
+        this.lastFrameAt = null;
+        this.updateInfo();
+      }
+    });
+  }
+
+  getWorkAmount (currentTime) {
+    if (this.lastFrameAt) {
+      // Figure out how much time has passed. Catch up the NES!
+      let elapsed = currentTime - this.lastFrameAt;
+      return Math.floor(elapsed * CPU_CYCLES_PER_MS);
+    } else {
+      // We just started. Render a frame.
+      return CPU_CYCLES_PER_FRAME;
+    }
+  }
+
+  run (currentTime) {
+    let cycles = this.cpu.cc;
+    let catchup = this.getWorkAmount(currentTime);
+
+    while (this.cpu.cc - cycles < catchup) {
+      let step = this.cpu.step();
+      // ppuStep = this.ppu.step(step * 3); // PPU runs at 3 * CPU clock
+    }
+
+    // Reset CPU/PPU cycle count here?
+    // this.cpu.cc = this.cpu.cc - catchup;
+
+    this.lastFrameAt = window.performance.now();
+    if (!this.paused) { window.requestAnimationFrame(this.run); }
   }
 
 };

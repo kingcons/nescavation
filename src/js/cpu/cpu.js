@@ -17,7 +17,6 @@ class CPU {
     this.memory   = memory;
     this.opcodes  = {};
     this.opsInfo  = {};
-    this.paused   = true;
     this.cc       = 0;      // Cycle Count
 
     initOpcodes(this, this.memory);
@@ -29,15 +28,7 @@ class CPU {
 
   step () {
     let instruction = this.memory.load(this.pc);
-    console.log(this.opsInfo[instruction].name);
-    console.log(this);
-    this.opcodes[instruction]();
-  }
-
-  run () {
-    // while (!this.paused) {
-    //   this.step();
-    // }
+    return this.opcodes[instruction]();
   }
 
   /* Status Register Utilities */

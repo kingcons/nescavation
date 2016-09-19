@@ -266,7 +266,7 @@ function buildOp (cpu, version, method, trackPC) {
     if (trackPC) {
       this.pc += bytes - 1;
     }
-    this.cc += cycles;
+    return this.cc += cycles;
   }.bind(cpu);
 }
 
