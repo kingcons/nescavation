@@ -248,7 +248,7 @@ function initAccessor (addrMode, raw) {
   // KLUDGE: The only raw setter calls are in accumulator mode.
   // Specifically in asl, lsr, rol, and ror.
   if (raw) {
-   accessor = {
+    accessor = {
       get: (cpu) => addrMode.call(cpu.memory, cpu),
       set: (cpu, value) => { cpu.acc = value; }
     };
