@@ -7,8 +7,11 @@
   * [1] http://nesdev.icequake.net/nes.txt
   * [2] http://problemkaputt.de/everynes.txt -- I/O Map section especially
   * [3] http://wiki.nesdev.com/w/index.php/PPU_registers
-  * [4] http://www.thealmightyguru.com/Games/Hacking/Wiki/index.php?title=NES_Palette
-  * [5] http://forums.nesdev.com/viewtopic.php?f=2&t=6424
+  * [4] http://wiki.nesdev.com/w/index.php/PPU_scrolling
+  * [5] http://wiki.nesdev.com/w/index.php/PPU_rendering
+  * [6] http://www.thealmightyguru.com/Games/Hacking/Wiki/index.php?title=NES_Palette
+  * [7] https://opcode-defined.quora.com/
+  * [8] http://forums.nesdev.com/viewtopic.php?f=2&t=6424
 
  */
 
@@ -41,12 +44,24 @@ class PPU {
 
   constructor () {
     // REMINDER: 6502 uses little-endian byte ordering.
-    // FIXME: Find a cleaner way to represent scroll. :-/
+    this.cycle = 0;
+    this.scanline = 0;
+
+    // REMINDER: The pattern table data is in cart CHR ROM/RAM.
+    this.VRAM = {
+      nameTables: new Uint8Array(0x800),
+      paletteTable: new Uint8Array(0x20)
+    };
+    this.OAM = new Uint8Array(0x100);
+    this.mapper = null;
+
+    // NOTE: Find a cleaner way to represent scroll? :-/
     this.registers = {
       control:     0,
       mask:        0,
       status:      0,
       oam_address: 0,
+      buffer:      0,
       scroll:      {
         x:     0,
         y:     0,
@@ -54,41 +69,39 @@ class PPU {
       },
       address:     {
         value: 0,
+        temp:  0,
         byte:  "High"
-      }
-    };
-    // NOTE: The PPU is pretty damn weird sometimes.
-    this.behaviors = {
-      buffer:      0,
-      scrollX:     0,
-      scrollY:     0,
-      scanline:    0
+      },
+      fineX:   0,
+      fineY:   0
     };
 
-    // REMINDER: The pattern table data is in cart CHR.
-    this.VRAM = {
-      nameTables: new Uint8Array(0x800),
-      paletteTable: new Uint8Array(0x20)
-    };
-    this.OAM = new Uint8Array(0x100);
-    this.mapper = null;
+  }
+
+  reset () {
+    this.cycle = 340;
+    this.scanline = 240;
+    this.registers.control = 0;
+    this.registers.mask = 0;
+    this.registers.oam_address = 0;
   }
 
   load (address) {
     let result = null;
     switch (address & 7) {
-    case 0:
-      result = this.registers.control; break;
-    case 1:
-      result = this.registers.mask; break;
     case 2:
+      // TODO: This badly needs an overhaul.
       this.registers.scroll.next = "X";
       this.registers.address.byte = "High";
       result = this.registers.status; break;
+    case 4:
+      // NOTE: "Never meant to be read"? [8]
+      result = this.OAM[this.oam_address];
     case 7:
-      result = this.loadVRAM(); break;
+      result = this.loadPPU(); break;
+    case 0:  // PPU Control, Write Only.
+    case 1:  // PPU Mask, Write Only.
     case 3:  // SPR-RAM Address, Write Only.
-    case 4:  // OAM Reading, "Never meant to be read"[5].
     case 5:  // PPU Scroll, Write Only.
     case 6:  // PPU Address, Write Only.
       result = 0; break;
@@ -100,6 +113,7 @@ class PPU {
     switch (address & 7) {
     case 0:
       this.registers.control = value; break;
+      // TODO: Maybe some nmiChange stuff here?
     case 1:
       this.registers.mask = value; break;
     case 2:
@@ -110,27 +124,43 @@ class PPU {
       this.OAM[this.oam_address] = value;
       this.oam_address += 1; break;
     case 5:
-      // TODO: How does PPU scrolling *actually* work tho?
-      // see: http://wiki.nesdev.com/w/index.php/PPU_scrolling
-      break;
+      this.updateScroll(value); break;
     case 6:
-      this.updatePpuAddress(value);
-      break;
+      this.updatePpuAddress(value); break;
     case 7:
-      this.storeVRAM(value); break;
+      this.storePPU(value); break;
     }
   }
 
-  loadVRAM () {
+  loadPPU () {
     let address = this.registers.address.value;
+    let data = this.loadVRAM(address);
+    this.updateVramAddress();
 
+    // Emulate buffered reads. PPUDATA so goofy.
+    if (address < 0x3f00) {
+      // Destructuring swap. Buffer the data, return what was buffered.
+      [this.registers.buffer, data] = [data, this.registers.buffer];
+      return data;
+    } else {
+      return data;
+    }
+  }
+
+  loadVRAM (address) {
     if (address < 0x2000) {
       return this.mapper.loadChr(address);
     } else if (address < 0x3f00) {
+      // TODO: Handle mirroring here!!!
       return this.vram.nameTables[address & 0x7ff];
     } else {
-      return this.vram.paletteTable[address & 0x1f];
+      return this.loadPalette(address & 0x1f);
     }
+  }
+
+  storePPU (value) {
+    this.storeVRAM(value);
+    this.updateVramAddress();
   }
 
   storeVRAM (value) {
@@ -139,13 +169,33 @@ class PPU {
     if (address < 0x2000) {
       this.mapper.storeChr(address, value);
     } else if (address < 0x3f00) {
+      // TODO: Handle mirroring here!!!
       this.vram.nameTables[address & 0x7ff] = value;
     } else {
-      // TODO: Sprite Background vs Universal Background?
-      this.vram.paletteTable[address & 0x1f] = value;
+      this.storePalette(address, value);
     }
 
     this.updateVramAddress();
+  }
+
+  backgroundPaletteHack (address) {
+    if (address > 0x0f && address % 4 === 0) {
+      // The background colors are mirrored to the sprites here.
+      return address - 16;
+    } else {
+      // Just use the address as normal.
+      return address;
+    }
+  }
+
+  loadPalette (address) {
+    let index = this.backgroundPaletteHack(address);
+    return this.vram.paletteTable[index];
+  }
+
+  storePalette (address, value) {
+    let index = this.backgroundPaletteHack(address);
+    this.vram.paletteTable[index] = value;
   }
 
   updatePpuAddress (value) {
