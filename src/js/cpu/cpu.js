@@ -26,6 +26,13 @@ class CPU {
     this.pc = this.memory.loadWord(0xfffc);
   }
 
+  nmi () {
+    this.stackPushWord(this.pc);
+    this.stackPush(this.status);
+    this.pc = this.memory.loadWord(0xfffa);
+    this.cc += 7;
+  }
+
   step () {
     let instruction = this.memory.load(this.pc);
     return this.opcodes[instruction]();
@@ -166,7 +173,6 @@ class CPU {
   }
 
   brk (addrMode) {
-    // FIXME: Should we really be incrementing here?
     let pc = this.pc + 1 & 0xffff;
     this.stackPushWord(pc);
     this.setFlag("BREAK");
@@ -296,14 +302,12 @@ class CPU {
     this.acc = result;
   }
 
-  // FIXME: Any status flag tweaks needed in PHP/PLP?
-
   pha (addrMode) {
     this.stackPush(this.acc);
   }
 
   php (addrMode) {
-    this.stackPush(this.status);
+    this.stackPush(this.status | 0x10);
   }
 
   pla (addrMode) {
