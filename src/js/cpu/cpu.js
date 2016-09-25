@@ -72,9 +72,20 @@ class CPU {
     if (result >= 0) { this.setFlag("CARRY"); }
   }
 
+  addBranchCycles (address) {
+    if (this.memory.pageCrossed(this.pc, address)) {
+      this.cc += 2;
+    } else {
+      this.cc += 1;
+    }
+  }
+
   branchIf (jump) {
+    let address = this.memory.relative(this);
+
     if (jump) {
-      this.pc = this.memory.relative(this);
+      this.addBranchCycles(address);
+      this.pc = address;
     } else {
       this.pc += 1;
     }

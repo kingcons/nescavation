@@ -40,8 +40,24 @@ class Memory {
     return results;
   }
 
+  pageCrossed (start, end) {
+    // Ignore the low byte. Are the high bytes different?
+    return start & 0xff00 != end & 0xff00;
+  }
+
+  loadIndirect (address) {
+    let wrapped  = address & 0xff00 + (address + 1 & 0xff);
+    let lowByte  = this.load(address);
+    let highByte = this.load(wrapped);
+
+    return highByte << 8 + lowByte;
+  }
+
   loadWord (address) {
-    return this.load(address) + (this.load(address + 1) << 8);
+    let lowByte  = this.load(address);
+    let highByte = this.load(address + 1);
+
+    return highByte << 8 + lowByte;
   }
 
   load (address) {
@@ -130,24 +146,29 @@ class Memory {
     return address;
   }
 
-  // NOTE: Indirect is only used by JMP.
+  /*
+
+  NOTE: Indirect is only used by JMP.
+  indirectX adds register before load, indirectY does after.
+  They also load wrapping the low byte but not the high byte.
+
+   */
+
   indirect (cpu) {
     let start = this.loadWord(cpu.pc);
-    let address = this.loadWord(start);
+    let address = this.loadIndirect(start);
     return address;
   }
 
   indirectX (cpu) {
-    let start = this.load(cpu.pc);
-    let indirect = start + cpu.xReg & 0xff;
-    let address = this.loadWord(indirect);
+    let start = this.load(cpu.pc) = cpu.xReg;
+    let address = this.loadIndirect(start);
     return address;
   }
 
   indirectY (cpu) {
     let start = this.load(cpu.pc);
-    let indirect = start + cpu.yReg & 0xff;
-    let address = this.loadWord(indirect);
+    let address = this.loadIndirect(start) + cpu.yReg;
     return address;
   }
 
