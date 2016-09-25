@@ -103,7 +103,6 @@ class Memory {
   //
 
   // REMINDER: The operator precedence of + is greater than &.
-  // FIXME: Handle page wrapping in indirect modes.
   // FIXME: Handle cycle counting correctly. :troll:
 
   immediate (cpu) {
@@ -161,7 +160,7 @@ class Memory {
   }
 
   indirectX (cpu) {
-    let start = this.load(cpu.pc) = cpu.xReg;
+    let start = this.load(cpu.pc) + cpu.xReg;
     let address = this.loadIndirect(start);
     return address;
   }
