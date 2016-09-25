@@ -153,21 +153,23 @@ class Memory {
 
   relative (cpu) {
     let offset = this.load(cpu.pc);
-    let direction = offset & 0x80;
+    let directionBit = offset >> 7;
     let address;
 
     /*
-     The top bit in the offset is a direction,
-     with 1 meaning go back and 0 meaning go forwards.
-     Note that negative numbers are in two's complement.
+     Remember that negative numbers are in two's complement.
      See: https://en.wikipedia.org/wiki/Two%27s_complement
+
+     The Two's Complement value is given by (x ^ 0xff) + 1
+     but we just use (x ^ 0xff) here since our cpu.step()
+     has the PC pointing to the offset, not the next opcode.
      */
 
-    if (direction === 0) {
+    if (directionBit === 0) {
       address = cpu.pc + offset & 0xffff;
     } else {
-      let signed = (offset ^ 0xff) + 1;
-      address = cpu.pc - signed & 0xffff;
+      offset = offset ^ 0xff;
+      address = cpu.pc - offset & 0xffff;
     }
 
     return address;
