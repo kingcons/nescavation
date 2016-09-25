@@ -11,14 +11,15 @@ const CPU_CYCLES_PER_FRAME = 29780;
 
 class AppController {
 
-  constructor (cpu, {state, controls, disassembly}) {
-    this.reader = new FileReader();
-    this.state = state;
-    this.controls = controls;
-    this.disassembly = disassembly;
-    this.cpu = cpu;
-    this.paused = true;
-    this.lastFrameAt = null;
+  constructor (cpu, {state, controls, disassembly, screen}) {
+    this.reader       = new FileReader();
+    this.state        = state;
+    this.controls     = controls;
+    this.disassembly  = disassembly;
+    this.screen       = screen;
+    this.cpu          = cpu;
+    this.paused       = true;
+    this.lastFrameAt  = null;
   }
 
   init () {
@@ -35,6 +36,14 @@ class AppController {
     this.updateDisassembly();
   }
 
+  romLoadHandler () {
+    this.reader.onload = this.swapCartridge.bind(this);
+    this.controls.find(".file").on("change", ev => {
+      let file = ev.target.files[0];
+      this.reader.readAsArrayBuffer(file);
+    });
+  }
+
   updateInfo () {
     this.updateDisassembly();
     this.updateCpuState();
@@ -49,14 +58,6 @@ class AppController {
   updateCpuState () {
     let html = cpuRegTmpl(this.cpu);
     this.controls.find(".cpu-state").html(html);
-  }
-
-  romLoadHandler () {
-    this.reader.onload = this.swapCartridge.bind(this);
-    this.controls.find(".file").on("change", ev => {
-      let file = ev.target.files[0];
-      this.reader.readAsArrayBuffer(file);
-    });
   }
 
   stepHandler () {
