@@ -50,7 +50,7 @@ class Memory {
     let lowByte  = this.load(address);
     let highByte = this.load(wrapped);
 
-    return highByte << 8 + lowByte;
+    return (highByte << 8) + lowByte;
   }
 
   loadWord (address) {
