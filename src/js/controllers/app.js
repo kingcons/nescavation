@@ -111,15 +111,24 @@ class AppController {
 
   stepNintendo (prevCycles, todoCycles) {
     while (this.cpu.cc - prevCycles < todoCycles) {
-      this.cpu.step();
-      // ppuStep = this.ppu.step(step * 3); // PPU runs at 3 * CPU clock
+      let ppuResult = this.cpu.memory.ppu.ppuResult;
+
+      let cycles = this.cpu.step();
+      for (let i = 0; i < cycles * 3; i++) {
+        ppuResult = this.cpu.memory.ppu.step();
+      }
+
+      if (ppuResult.vBlank) { this.cpu.nmi(); }
+      if (ppuResult.newFrame) { this.updateScreen(this.cpu); }
     }
 
     let overtime = this.cpu.cc - (prevCycles + todoCycles);
-    console.log(`Working overtime: ${overtime} cycles`);
+    // console.log(`Worked overtime: ${overtime} cycles`);
+    // this.cpu.cc = overtime;
+  }
 
-    // Reset CPU/PPU cycle count here?
-    // this.cpu.cc = this.cpu.cc - todoCycles;
+  updateScreen (cpu) {
+    let ppu = this.cpu.memory.ppu;
   }
 
   run (currentTime) {

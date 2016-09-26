@@ -40,12 +40,34 @@ const PALETTE = [
   0x00, 0x00, 0x00
 ];
 
+class ScanlineData {
+
+  constructor () {
+    this.nameTableByte       = 0;
+    this.attributeTableByte  = 0;
+    this.lowTileByte         = 0;
+    this.highTileByte        = 0;
+    this.tileData            = 0;
+
+    this.spriteCount         = 0;
+    this.spritePatterns      = new Uint32Array(8);
+    this.spritePriorities    = new Uint8Array(8);
+    this.spriteIndexes       = new Uint8Array(8);
+  }
+
+}
+
 class PPU {
 
   constructor () {
-    // REMINDER: 6502 uses little-endian byte ordering.
+    this.ppuResult = {
+      vBlank:   false,
+      newFrame: false
+    };
+    this.buffer = new Uint8Array(256*240*3);
     this.cycle = 0;
     this.scanline = 0;
+    this.scanlineData = new ScanlineData();
 
     // REMINDER: The pattern table data is in cart CHR ROM/RAM.
     this.VRAM = {
@@ -86,6 +108,8 @@ class PPU {
     this.registers.oam_address = 0;
   }
 
+  // PPU Memory Map
+
   load (address) {
     let result = null;
     switch (address & 7) {
@@ -113,7 +137,6 @@ class PPU {
     switch (address & 7) {
     case 0:
       this.registers.control = value; break;
-      // TODO: Maybe some nmiChange stuff here?
     case 1:
       this.registers.mask = value; break;
     case 2:
@@ -131,6 +154,8 @@ class PPU {
       this.storePPU(value); break;
     }
   }
+
+  // PPU Registers
 
   loadPPU () {
     let address = this.registers.address.value;
@@ -151,7 +176,7 @@ class PPU {
     if (address < 0x2000) {
       return this.mapper.loadChr(address);
     } else if (address < 0x3f00) {
-      // TODO: Handle mirroring here!!!
+      // TODO: Handle mirroring here!!! Should this be & 0xfff? :-/
       return this.vram.nameTables[address & 0x7ff];
     } else {
       return this.loadPalette(address & 0x1f);
@@ -178,13 +203,12 @@ class PPU {
     this.updateVramAddress();
   }
 
-  backgroundPaletteHack (address) {
-    if (address > 0x0f && address % 4 === 0) {
-      // The background colors are mirrored to the sprites here.
-      return address - 16;
+  updateVramAddress () {
+    let incrementBit = this.registers.control & 0x04;
+    if (incrementBit === 0) {
+      this.registers.address.value += 1;
     } else {
-      // Just use the address as normal.
-      return address;
+      this.registers.address.value += 32;
     }
   }
 
@@ -198,9 +222,20 @@ class PPU {
     this.vram.paletteTable[index] = value;
   }
 
+  backgroundPaletteHack (address) {
+    if (address > 0x0f && address % 4 === 0) {
+      // The background colors are mirrored to the sprites here.
+      return address - 16;
+    } else {
+      // Just use the address as normal.
+      return address;
+    }
+  }
+
   updatePpuAddress (value) {
     let previous = this.registers.address.value;
     let newAddress = null;
+
     if (this.registers.address.next === "High") {
       newAddress = previous & 0x00ff | (value << 8);
       this.registers.address.next = "Low";
@@ -208,16 +243,48 @@ class PPU {
       newAddress = previous & 0xff00 | value;
       this.registers.address.next = "High";
     }
+
     this.registers.address.value = newAddress;
   }
 
-  updateVramAddress () {
-    let incrementBit = this.registers.control & 0x04;
-    if (incrementBit === 0) {
-      this.registers.address.value += 1;
-    } else {
-      this.registers.address.value += 32;
+  // Scanline Behavior
+
+
+  // High-Level Drivers
+
+  startVblank () {
+    this.ppuResult.vBlank = true;
+    this.registers.control = this.registers.control | 0x80;
+  }
+
+  finishFrame () {
+    this.ppuResult.newFrame = true;
+    this.registers.control = this.registers.control & ~0x80;
+    this.scanline = 0;
+  }
+
+  updateClock () {
+    this.cycle += 1;
+    if (this.cycle > 340) {
+      this.cycle = 0;
+      this.scanline += 1;
     }
+  }
+
+  step () {
+    this.updateClock();
+
+    // Are either the PPUMASK show-bg or show-sprites bits set?
+    let isEnabled = (this.registers.mask >> 3 & 3) > 0;
+
+    if (this.scanline === 241 && this.cycle === 1) {
+      this.startVblank();
+    }
+    if (this.scanline === 261 && this.cycle === 1) {
+      this.finishFrame();
+    }
+
+    return this.ppuResult;
   }
 
 }
