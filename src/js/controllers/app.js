@@ -23,10 +23,17 @@ class AppController {
   }
 
   init () {
+    this.initScreen();
     this.romLoadHandler();
     this.playPauseHandler();
     this.stepHandler();
     this.stepFrameHandler();
+  }
+
+  initScreen () {
+    let context = this.screen.getContext('2d');
+    context.fillStyle = 'black';
+    context.fillRect(0, 0, 256, 240);
   }
 
   swapCartridge () {

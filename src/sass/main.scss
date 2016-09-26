@@ -8,6 +8,9 @@
 .nes-window {
     background-color: $blue;
     min-width: 300px;
+    .nes-screen {
+        margin: auto;
+    }
 }
 
 .nes-controls {
@@ -16,11 +19,12 @@
 }
 
 .nes-disassembly {
-    max-width: 50%;
+    min-height: 650px;
+    width: 30%;
+    max-width: 425px;
     background-color: $black;
-}
-
-.disasm-table {
-    background-color: $black;
-    color: $green;
+  .disasm-table {
+      background-color: $black;
+      color: $green;
+  }
 }
