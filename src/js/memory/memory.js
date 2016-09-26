@@ -57,7 +57,7 @@ class Memory {
     let lowByte  = this.load(address);
     let highByte = this.load(address + 1);
 
-    return highByte << 8 + lowByte;
+    return (highByte << 8) + lowByte;
   }
 
   load (address) {
