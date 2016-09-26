@@ -262,6 +262,13 @@ class PPU {
 
   // Scanline Behavior
 
+  fetchCycle () {
+    // TODO
+  }
+
+  renderCycle () {
+    // TODO
+  }
 
   // High-Level Drivers
 
@@ -274,6 +281,19 @@ class PPU {
     this.ppuResult.newFrame = true;
     this.registers.control = this.registers.control & ~0x80;
     this.scanline = 0;
+  }
+
+  isFetchCycle () {
+    let fetchCycle = this.cycle >= 1 && this.cycle <= 256;
+    let preFetchCycle = this.cycle >= 321 && this.cycle <= 336;
+    let validCycle = preFetchCycle || fetchCycle;
+    let validLine  = this.scanline < 240 || this.scanline === 261;
+    return validCycle && validLine;
+  }
+
+  isRenderCycle () {
+    let renderCycle = this.cycle >= 1 && this.cycle <= 256;
+    return this.scanline < 240 && renderCycle;
   }
 
   updateClock () {
@@ -289,6 +309,14 @@ class PPU {
 
     // Are either the PPUMASK show-bg or show-sprites bits set?
     let isEnabled = (this.registers.mask >> 3 & 3) > 0;
+
+    if (isEnabled && this.isFetchCycle()) {
+      this.fetchCycle();
+    }
+
+    if (isEnabled && this.isRenderCycle()) {
+      this.renderCycle();
+    }
 
     if (this.scanline === 241 && this.cycle === 1) {
       this.startVblank();

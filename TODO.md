@@ -1,5 +1,6 @@
 * Finish the PPU.
   * Draw backgrounds.
+  * Handle mirroring.
   * Draw sprites.
   * Implement scrolling.
 
