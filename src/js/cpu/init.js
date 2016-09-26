@@ -261,12 +261,16 @@ function buildOp (cpu, version, method, trackPC) {
   let [bytes, cycles, addrMode, raw] = version;
   let accessor = initAccessor(addrMode, raw);
   return function () {
+    let prevCc = this.cc;
+
     this.pc += 1;
     method.bind(this)(accessor);
     if (trackPC) {
       this.pc += bytes - 1;
     }
-    return this.cc += cycles;
+    this.cc += cycles;
+
+    return this.cc - prevCc;
   }.bind(cpu);
 }
 
