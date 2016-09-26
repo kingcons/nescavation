@@ -118,6 +118,7 @@ class AppController {
         ppuResult = this.cpu.memory.ppu.step();
       }
 
+      if (ppuResult.dma) { this.cpu.cc += 513; }
       if (ppuResult.vBlank) { this.cpu.nmi(); }
       if (ppuResult.newFrame) { this.updateScreen(this.cpu); }
     }

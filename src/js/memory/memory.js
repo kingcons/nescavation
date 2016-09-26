@@ -84,6 +84,8 @@ class Memory {
       return this.memory[address & 0x7ff] = value;
     } else if (address < 0x4000) {
       return this.ppu.store(address, value);
+    } else if (address === 0x4014) {
+      return this.ppu.dma(this, value);
     } else if (address === 0x4016) {
       // store into Input
       return "not implemented";

@@ -62,7 +62,8 @@ class PPU {
   constructor () {
     this.ppuResult = {
       vBlank:   false,
-      newFrame: false
+      newFrame: false,
+      dma:      false
     };
     this.buffer = new Uint8Array(256*240*3);
     this.cycle = 0;
@@ -106,6 +107,18 @@ class PPU {
     this.registers.control = 0;
     this.registers.mask = 0;
     this.registers.oam_address = 0;
+  }
+
+  dma (memory, page) {
+    let address = page << 8;
+
+    for (let i = 0; i < 256; i++) {
+      this.OAM[this.oam_address] = memory.load(address);
+      this.oam_address += 1;
+      address += 1;
+    }
+
+    this.ppuResult.dma = true;
   }
 
   // PPU Memory Map
