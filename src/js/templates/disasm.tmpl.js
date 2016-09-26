@@ -1,6 +1,5 @@
 function disasmTmpl (rows) {
   return `
-  <div class="tile is-child">
     <table class="table disasm-table">
       <thead>
         <tr>
@@ -13,7 +12,6 @@ function disasmTmpl (rows) {
         ${rows.map(disasmRowTmpl).join("")}
       </tbody>
     </table>
-  </div>
     `;
 }
 

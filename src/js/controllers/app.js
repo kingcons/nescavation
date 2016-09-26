@@ -24,6 +24,7 @@ class AppController {
 
   init () {
     this.initScreen();
+    this.updateInfo();
     this.romLoadHandler();
     this.playPauseHandler();
     this.stepHandler();
@@ -40,7 +41,7 @@ class AppController {
     let data = new Uint8Array(this.reader.result);
     this.cpu.memory.swapCart(data);
     this.cpu.reset();
-    this.updateDisassembly();
+    this.updateInfo();
   }
 
   romLoadHandler () {
@@ -57,7 +58,7 @@ class AppController {
   }
 
   updateDisassembly () {
-    let results = disassembleRange(this.cpu, 0x20);
+    let results = disassembleRange(this.cpu, 0x18);
     let html = disasmTmpl(results);
     this.disassembly.html(html);
   }
